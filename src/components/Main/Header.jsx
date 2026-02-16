@@ -6,6 +6,7 @@ import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
+import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
 
 export default function Header({ weather }) {
   const [recommendation, setRecommendation] = useState("");
@@ -20,6 +21,9 @@ export default function Header({ weather }) {
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
 
+  const { hour24, time12 } = parseTimeWith12Hour(localTime);
+  const bgTheme = getBgTheme(hour24, styles);
+
   useEffect(() => {
     const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
     setRecommendation(tips);
@@ -33,7 +37,8 @@ export default function Header({ weather }) {
   }, [currentCondition, isDay]);
 
   return (
-    <header className={styles.header}>
+    <header className={`${bgTheme} p-3 text-white w-100`}>
+      <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={faLocationDot} className="me-2" />
         {locationName} — {currentTemp}°F

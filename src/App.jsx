@@ -12,7 +12,7 @@ function App() {
       condition: "Cloudy",
       hightemp_f: 75,
       lowtemp_f: 48,
-      clockTime: "2:30PM",
+      localTime: "2026-02-15 14:30",
     },
     {
       city: "Los Angeles, CA",
@@ -20,7 +20,7 @@ function App() {
       condition: "Sunny",
       hightemp_f: 88,
       lowtemp_f: 65,
-      clockTime: "11:15AM",
+      localTime: "2026-02-15 11:15",
     },
     {
       city: "Chicago, IL",
@@ -28,7 +28,7 @@ function App() {
       condition: "Rainy",
       hightemp_f: 58,
       lowtemp_f: 42,
-      clockTime: "6:45PM",
+      localTime: "2026-02-15 18:45",
     },
     {
       city: "Tokyo, Japan",
@@ -36,7 +36,7 @@ function App() {
       condition: "Rainy",
       hightemp_f: 84,
       lowtemp_f: 72,
-      clockTime: "3:20AM",
+      localTime: "2026-02-15 03:25",
     },
   ]);
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
@@ -68,7 +68,7 @@ function App() {
         onAddLocation={(loc) => setLocations([...locations, loc])}
         onSearch={setQuery}
       />
-      <main>
+      <main className="w-100 d-flex">
         <WeatherFetcher
           query={query}
           onData={setWeather}
@@ -78,7 +78,7 @@ function App() {
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
         {weather && (
-          <div className="container-fluid p-3">
+          <div className="container-fluid p-0 d-flex flex-column w-100">
             <Header weather={weather} />
           </div>
         )}
