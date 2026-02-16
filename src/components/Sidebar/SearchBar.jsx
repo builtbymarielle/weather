@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import styles from "./SearchBar.module.css";
 
 export default function SearchBar({ onSearch }) {
   const handleSubmit = (e) => {
@@ -13,13 +14,10 @@ export default function SearchBar({ onSearch }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex justify-center items-center bg-sidebarDark rounded shadow-md"
-    >
-      <div className="flex items-center w-full max-w-md bg-dark2 rounded">
+    <form onSubmit={handleSubmit} className="rounded shadow-md">
+      <div className={`d-flex ${styles.bgInputDark} rounded`}>
         <button
-          className="px-2 py-1 bg-transparent text-light rounded-start"
+          className="px-2 py-1 bg-transparent text-light rounded-start border-0"
           type="submit"
         >
           <FontAwesomeIcon icon={faMagnifyingGlass} className="text-gray-300" />
@@ -27,8 +25,8 @@ export default function SearchBar({ onSearch }) {
         <input
           name="location"
           placeholder="Search for a city..."
-          id="searchInput"
-          className="flex-1 bg-transparent outline-none"
+          id={`${styles.searchInput}`}
+          className="w-100 bg-transparent outline-none"
           autoComplete="off"
         />
       </div>

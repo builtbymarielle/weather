@@ -1,0 +1,43 @@
+.locCard{
+    text-align: start;
+}
+
+.locCard.bgSunrise {
+  background: var(--bg-sunrise);
+}
+
+.locCard.bgDay {
+  background: var(--bg-daytime);
+}
+
+.locCard.bgSunset {
+  background: var(--bg-sunset);
+}
+
+.locCard.bgNight {
+  background: var(--bg-nighttime);
+}
+
+.locCard small{
+  font-size: 12px;
+  font-weight: 200;
+}
+
+.locCard svg{
+  font-size: 12px;
+}
+
+.locCard h5{
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.locCard h1{
+  font-size: 40px;
+  font-weight: 600;
+}
+
+.locCard p{
+  font-size: 12px;
+  font-weight: 400;
+}
