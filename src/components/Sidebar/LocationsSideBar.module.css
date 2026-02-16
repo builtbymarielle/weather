@@ -2,10 +2,10 @@
   background: var(--bg-ourdark);
 }
 
-.customBrand{
+.customBrand {
   border-bottom: 1px solid var(--text-white-trans);
 }
-.customBrand span{
+.customBrand span {
   color: var(--text-white);
   font-size: 20px;
   font-weight: 600;
@@ -16,7 +16,7 @@
   font-size: 18px;
 }
 
-.customTitle span{
+.customTitle span {
   color: var(--text-white-trans);
   font-size: 12px;
   font-weight: 300;

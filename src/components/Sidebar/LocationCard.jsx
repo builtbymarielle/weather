@@ -1,5 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLocationDot,
+  faLocationArrow,
+} from "@fortawesome/free-solid-svg-icons";
 import styles from "./LocationCard.module.css";
 import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
 
@@ -11,9 +14,12 @@ export default function LocationCard({
   hightemp_f,
   localTime,
   selected,
+  isCurrent,
 }) {
   const { hour24, time12 } = parseTimeWith12Hour(localTime);
   const bgTheme = getBgTheme(hour24, styles);
+
+  const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
   return (
     <div
@@ -22,7 +28,7 @@ export default function LocationCard({
       {!selected && <div className={styles.overlay}></div>} {/* overlay */}
       <small>{time12}</small>
       <div className="d-flex align-items-center">
-        <FontAwesomeIcon icon={faLocationDot} className="me-1" />
+        <FontAwesomeIcon icon={locationIcon} className="me-1" />
         <h5 className="m-0">{city}</h5>
       </div>
       <h1>{temp}°F</h1>

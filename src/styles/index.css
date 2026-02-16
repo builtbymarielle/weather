@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
 
 :root {
-  --bg-sunrise: linear-gradient(135deg, #87CEEB 0%, #FFEBCD 100%);
-  --bg-daytime: linear-gradient(135deg, #4FACFE 0%, #DFF9FF 100%); 
-  --bg-sunset: linear-gradient(135deg, #FA709A 0%, #FEE140 100%); 
-  --bg-nighttime: linear-gradient(135deg, #0F2027 0%, #2C5364 100%);  
-  --bg-ourdark: #1E293B;
+  --bg-sunrise: linear-gradient(135deg, #87ceeb 0%, #ffebcd 100%);
+  --bg-daytime: linear-gradient(135deg, #4facfe 0%, #dff9ff 100%);
+  --bg-sunset: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --bg-nighttime: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+  --bg-ourdark: #1e293b;
   --bg-dark2: #334155;
 
-  --text-white: #FFFFFF;
-  --text-white-trans: #FFFFFF80;
+  --text-white: #ffffff;
+  --text-white-trans: #ffffff80;
 }
 
 body {
@@ -32,6 +32,7 @@ button {
   cursor: pointer;
 }
 
-aside{
-  width: 335px;
+aside {
+  min-width: 335px;
+  overflow: scroll;
 }
