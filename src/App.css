@@ -38,6 +38,10 @@ aside{
   width: 335px;
 }
 
+.weather-card{
+  text-align: start;
+}
+
 .weather-card.bg-sunrise {
   background: var(--sunrise-background);
 }

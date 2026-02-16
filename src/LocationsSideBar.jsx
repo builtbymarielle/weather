@@ -16,7 +16,7 @@ function LocationsSideBar({
 }) {
   return (
     <>
-      <aside className="sidebar bg-sidebarDark border-end text-white p-3">
+      <aside className="sidebar bg-sidebarDark p-3">
         <div className="sidebar-header pb-2">
           <div className="sidebar-brand pb-2 mb-2">
             <FontAwesomeIcon icon={faLocationDot} className="me-1" />

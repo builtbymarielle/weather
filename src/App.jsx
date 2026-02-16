@@ -59,7 +59,7 @@ function App() {
   }, [selectedLocation]);
 
   return (
-    <div className="flex h-screen">
+    <div className="d-flex vh-100">
       <LocationsSideBar
         locations={locations}
         selectedLocation={selectedLocation}
@@ -67,7 +67,7 @@ function App() {
         onAddLocation={(loc) => setLocations([...locations, loc])}
         onSearch={setQuery}
       />
-      <main className="flex-1 p-8 overflow-auto">
+      <main>
         <WeatherFetcher
           query={query}
           onData={setWeather}
@@ -79,7 +79,7 @@ function App() {
         {weather && (
           <div className="container-fluid p-3">
             {/* You can customize this to show more details */}
-            <h2 className="text-2xl font-bold mb-4">{weather.location.name}</h2>
+            <h2 className="mb-4">{weather.location.name}</h2>
             <p className="mb-2">{weather.current.condition.text}</p>
             <p className="mb-2">Temperature: {weather.current.temp_c}°C</p>
             <p className="mb-2">
