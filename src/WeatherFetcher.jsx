@@ -12,8 +12,14 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
 
         // mock data for testing
         const mockData = {
-          location: { name: query },
-          current: { temp_c: 18, condition: { text: "Sunny" }, is_day_icon: 1 },
+          location: { name: query, localtime: "2024-06-01 12:00" },
+          current: {
+            temp_c: 18,
+            condition: { text: "Sunny" },
+            is_day_icon: 1,
+            hightemp_c: 23,
+            lowtemp_c: 15,
+          },
         };
 
         // Simulate network delay
@@ -21,7 +27,6 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
 
         onData(mockData);
 
-        // // ⚡ Uncomment below for real API call
         // const res = await fetch(
         //   `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${query}`,
         // );
