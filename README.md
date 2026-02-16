@@ -20,5 +20,5 @@ A simple weather application build with React and Vite, designed for practicing 
 - Weather Icons [link](https://erikflowers.github.io/weather-icons/)
 - Other Icons --- via Font Awesome [link](https://fontawesome.com/account/tokens)
 - Fonts --- Google Fonts
-- Mockups --- Want I designed in Figma [link](https://www.figma.com/design/rNcjFqGASRQJ9rCeXyigq0/New-Weather-App?node-id=0-1&t=OfYu3w2BK6jZhD3n-1)
+- Mockups --- What I designed in Figma [link](https://www.figma.com/design/rNcjFqGASRQJ9rCeXyigq0/New-Weather-App?node-id=0-1&t=OfYu3w2BK6jZhD3n-1)
 
