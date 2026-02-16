@@ -6,9 +6,10 @@ export default function LocationCard({
   city,
   temp,
   condition,
-  lowtemp_c,
-  hightemp_c,
+  lowtemp_f,
+  hightemp_f,
   clockTime,
+  selected,
 }) {
   // Parse time string (e.g., "2:30PM") to 24-hour format
   const parseTime = (timeStr) => {
@@ -35,18 +36,19 @@ export default function LocationCard({
 
   return (
     <div
-      className={`${styles.locCard} ${bgTheme} rounded p-2 w-100 text-white `}
+      className={`${styles.locCard} ${bgTheme} rounded p-2 w-100 text-white ${selected ? styles.selected : ""} `}
     >
+      {!selected && <div className={styles.overlay}></div>} {/* overlay */}
       <small>{clockTime}</small>
       <div className="d-flex align-items-center">
         <FontAwesomeIcon icon={faLocationDot} className="me-1" />
         <h5 className="m-0">{city}</h5>
       </div>
-      <h1>{temp}°C</h1>
+      <h1>{temp}°F</h1>
       <div className="d-flex align-items-center justify-content-between">
         <p className="text-lg m-0">{condition}</p>
         <p className="text-lg m-0 fw-bold">
-          L:{lowtemp_c}°C H:{hightemp_c}°C
+          L:{lowtemp_f}°F H:{hightemp_f}°F
         </p>
       </div>
     </div>

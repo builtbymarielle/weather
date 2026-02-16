@@ -40,13 +40,15 @@ function LocationsSideBar({
           </li>
           {locations && locations.length > 0 ? (
             locations.map((loc, idx) => (
-              <li className="nav-item mb-2">
+              <li key={loc.city + idx} className="nav-item mb-2">
                 <button
-                  key={loc.city + idx}
-                  className={`p-0 m-0 w-100 text-left border-0 rounded`}
+                  className={`p-0 m-0 w-100 text-left border-0 rounded bg-transparent`}
                   onClick={() => onSelectLocation(loc)}
                 >
-                  <LocationCard {...loc} />
+                  <LocationCard
+                    {...loc}
+                    selected={selectedLocation?.city === loc.city}
+                  />
                 </button>
               </li>
             ))

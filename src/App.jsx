@@ -9,32 +9,32 @@ function App() {
       city: "New York City, NY",
       temp: 70,
       condition: "Cloudy",
-      hightemp_c: 75,
-      lowtemp_c: 48,
+      hightemp_f: 75,
+      lowtemp_f: 48,
       clockTime: "2:30PM",
     },
     {
       city: "Los Angeles, CA",
       temp: 85,
       condition: "Sunny",
-      hightemp_c: 88,
-      lowtemp_c: 65,
+      hightemp_f: 88,
+      lowtemp_f: 65,
       clockTime: "11:15AM",
     },
     {
       city: "Chicago, IL",
       temp: 55,
       condition: "Rainy",
-      hightemp_c: 58,
-      lowtemp_c: 42,
+      hightemp_f: 58,
+      lowtemp_f: 42,
       clockTime: "6:45PM",
     },
     {
       city: "Tokyo, Japan",
       temp: 82,
       condition: "Rainy",
-      hightemp_c: 84,
-      lowtemp_c: 72,
+      hightemp_f: 84,
+      lowtemp_f: 72,
       clockTime: "3:20AM",
     },
   ]);
@@ -78,13 +78,12 @@ function App() {
         {error && <p className="text-center text-red-500">{error}</p>}
         {weather && (
           <div className="container-fluid p-3">
-            {/* You can customize this to show more details */}
             <h2 className="mb-4">{weather.location.name}</h2>
             <p className="mb-2">{weather.current.condition.text}</p>
-            <p className="mb-2">Temperature: {weather.current.temp_c}°C</p>
+            <p className="mb-2">Temperature: {weather.current.temp_f}°F</p>
             <p className="mb-2">
-              High: {weather.current.hightemp_c}°C, Low:{" "}
-              {weather.current.lowtemp_c}°C
+              High: {weather.current.hightemp_f}°F, Low:{" "}
+              {weather.current.lowtemp_f}°F
             </p>
             <p className="mb-2">Local Time: {weather.location.localtime}</p>
           </div>
