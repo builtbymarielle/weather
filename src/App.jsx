@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import WeatherFetcher from "./WeatherFetcher";
-import LocationsSideBar from "./LocationsSideBar";
-import "./App.css";
+import WeatherFetcher from "./services/WeatherFetcher";
+import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
+import "./styles/App.css";
 
 function App() {
   const [locations, setLocations] = useState([

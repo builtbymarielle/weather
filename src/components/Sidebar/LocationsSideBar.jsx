@@ -6,6 +6,7 @@ import {
   faStar,
   faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
+import styles from "./LocationsSideBar.module.css";
 
 function LocationsSideBar({
   locations,
@@ -16,9 +17,9 @@ function LocationsSideBar({
 }) {
   return (
     <>
-      <aside className="sidebar bg-sidebarDark p-3">
+      <aside className={`sidebar ${styles.bgColor} p-3`}>
         <div className="sidebar-header pb-2">
-          <div className="sidebar-brand pb-2 mb-2">
+          <div className={`${styles.customBrand} sidebar-brand pb-2 mb-2`}>
             <FontAwesomeIcon icon={faLocationDot} className="me-1" />
             <span>Locations</span>
           </div>
@@ -29,11 +30,11 @@ function LocationsSideBar({
           />
         </div>
         <ul className="sidebar-nav list-unstyled pb-2">
-          <li className="sidebar-title pb-2">
+          <li className={`${styles.customTitle} sidebar-title pb-2`}>
             <FontAwesomeIcon icon={faStar} className="me-1" />
             <span>Favorites</span>
           </li>
-          <li className="sidebar-title pb-2">
+          <li className={`${styles.customTitle} sidebar-title pb-2`}>
             <FontAwesomeIcon icon={faClockRotateLeft} className="me-1" />
             <span>Recents</span>
           </li>

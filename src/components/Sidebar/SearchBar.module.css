@@ -1,0 +1,20 @@
+
+.bgInputDark {
+  background: var(--bg-dark2);
+}
+
+#searchInput {
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 12px;
+}
+
+#searchInput::placeholder{
+  color: rgba(255, 255, 255, 0.55);
+}
+
+#searchInput:focus {
+  outline: none;
+}
