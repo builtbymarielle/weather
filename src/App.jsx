@@ -8,7 +8,13 @@ const MAX_RECENTS = 5;
 
 function App() {
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [recentLocations, setRecentLocations] = useState([]);
+  const [recentLocations, setRecentLocations] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("recentLocations")) || [];
+    } catch {
+      return [];
+    }
+  });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
@@ -25,13 +31,6 @@ function App() {
       },
       () => console.log("Geolocation denied or failed"),
     );
-  }, []);
-
-  // Loading recent locations from localStorage
-  useEffect(() => {
-    const storedRecents =
-      JSON.parse(localStorage.getItem("recentLocations")) || [];
-    setRecentLocations(storedRecents);
   }, []);
 
   // Save recent locations to localStorage whenever they change
