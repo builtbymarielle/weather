@@ -8,6 +8,7 @@ import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
 
 export default function LocationCard({
   city,
+  actualCityName,
   temp,
   condition,
   lowtemp_f,
@@ -20,6 +21,7 @@ export default function LocationCard({
   const bgTheme = getBgTheme(hour24, styles);
 
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
+  const showBoth = isCurrent && actualCityName;
 
   return (
     <div
@@ -27,12 +29,13 @@ export default function LocationCard({
     >
       {!selected && <div className={styles.overlay}></div>} {/* overlay */}
       <small>{time12}</small>
-      <div className="d-flex align-items-center">
+      <div className="d-flex align-items-baseline">
         <FontAwesomeIcon icon={locationIcon} className="me-1" />
-        <h5 className="m-0">{city}</h5>
+        <h5 className="m-0">{city}</h5>{" "}
+        {showBoth && <small className="m-0 ps-1">{actualCityName}</small>}
       </div>
       <h1>{temp}°F</h1>
-      <div className="d-flex align-items-center justify-content-between">
+      <div className="d-flex align-items-baseline justify-content-between">
         <p className="text-lg m-0">{condition}</p>
         <p className="text-lg m-0 fw-bold">
           L:{lowtemp_f}°F H:{hightemp_f}°F
