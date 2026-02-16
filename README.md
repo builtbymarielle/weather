@@ -1,16 +1,24 @@
-# React + Vite
+# Weather Application - React + Vite
+A simple weather application build with React and Vite, designed for practicing API integration, local storage, and UI features.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Features Practiced
+- Fetching data from a weather API
+- Storing user preferences in localStorage
+- Building UI components
+- Working with icons and external libraries for better UI
 
-Currently, two official plugins are available:
+## Setup Instructions
+1. Clone the repo
+2. Install dependences
+3. Create a .env file and add your API key from weatherapi.com
+4. run `npm run dev` to start start on localhost URL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tools & Resources
+- React + Vite
+- Bootstrap [link](https://getbootstrap.com/)
+- Weather API --- for real-time data [link](https://www.weatherapi.com/)
+- Weather Icons [link](https://erikflowers.github.io/weather-icons/)
+- Other Icons --- via Font Awesome [link](https://fontawesome.com/account/tokens)
+- Fonts --- Google Fonts
+- Mockups --- Want I designed in Figma [link](https://www.figma.com/design/rNcjFqGASRQJ9rCeXyigq0/New-Weather-App?node-id=0-1&t=OfYu3w2BK6jZhD3n-1)
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
