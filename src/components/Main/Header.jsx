@@ -1,6 +1,9 @@
 import React, { useState, useEffect, use } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLocationDot,
+  faLocationArrow,
+} from "@fortawesome/free-solid-svg-icons";
 import styles from "./Header.module.css";
 import {
   getWeatherIconClass,
@@ -8,7 +11,7 @@ import {
 } from "../../utils/weatherHelpers";
 import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
 
-export default function Header({ weather }) {
+export default function Header({ weather, isCurrent }) {
   const [recommendation, setRecommendation] = useState("");
   const [weatherIconClass, setWeatherIconClass] = useState("");
 
@@ -23,6 +26,7 @@ export default function Header({ weather }) {
 
   const { hour24, time12 } = parseTimeWith12Hour(localTime);
   const bgTheme = getBgTheme(hour24, styles);
+  const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
   useEffect(() => {
     const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
@@ -40,7 +44,7 @@ export default function Header({ weather }) {
     <header className={`${bgTheme} p-3 text-white w-100`}>
       <small>{time12}</small>
       <h2>
-        <FontAwesomeIcon icon={faLocationDot} className="me-2" />
+        <FontAwesomeIcon icon={locationIcon} className="me-2" />
         {locationName} — {currentTemp}°F
       </h2>
       <p>{currentCondition?.text}</p>

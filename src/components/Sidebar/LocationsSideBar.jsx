@@ -9,10 +9,10 @@ import {
 import styles from "./LocationsSideBar.module.css";
 
 function LocationsSideBar({
-  locations,
+  currentLocation,
+  recentLocations,
   selectedLocation,
   onSelectLocation,
-  onAddLocation,
   onSearch,
 }) {
   return (
@@ -34,12 +34,24 @@ function LocationsSideBar({
             <FontAwesomeIcon icon={faStar} className="me-1" />
             <span>Favorites</span>
           </li>
+          <li key={currentLocation} className="nav-item mb-2">
+            <button
+              className={`p-0 m-0 w-100 text-left border-0 rounded bg-transparent`}
+              onClick={() => onSelectLocation(currentLocation)}
+            >
+              <LocationCard
+                {...currentLocation}
+                selected={selectedLocation === currentLocation}
+                isCurrent={true}
+              />
+            </button>
+          </li>
           <li className={`${styles.customTitle} sidebar-title pb-2`}>
             <FontAwesomeIcon icon={faClockRotateLeft} className="me-1" />
             <span>Recents</span>
           </li>
-          {locations && locations.length > 0 ? (
-            locations.map((loc, idx) => (
+          {recentLocations && recentLocations.length > 0 ? (
+            recentLocations.map((loc, idx) => (
               <li key={loc.city + idx} className="nav-item mb-2">
                 <button
                   className={`p-0 m-0 w-100 text-left border-0 rounded bg-transparent`}
@@ -53,7 +65,7 @@ function LocationsSideBar({
               </li>
             ))
           ) : (
-            <p className="text-gray-500">No locations saved.</p>
+            <p className="text-white">No locations saved.</p>
           )}
         </ul>
       </aside>

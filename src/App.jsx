@@ -4,82 +4,106 @@ import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
 
+const MAX_RECENTS = 5;
+
 function App() {
-  const [locations, setLocations] = useState([
-    {
-      city: "New York City, NY",
-      temp: 70,
-      condition: "Cloudy",
-      hightemp_f: 75,
-      lowtemp_f: 48,
-      localTime: "2026-02-15 14:30",
-    },
-    {
-      city: "Los Angeles, CA",
-      temp: 85,
-      condition: "Sunny",
-      hightemp_f: 88,
-      lowtemp_f: 65,
-      localTime: "2026-02-15 11:15",
-    },
-    {
-      city: "Chicago, IL",
-      temp: 55,
-      condition: "Rainy",
-      hightemp_f: 58,
-      lowtemp_f: 42,
-      localTime: "2026-02-15 18:45",
-    },
-    {
-      city: "Tokyo, Japan",
-      temp: 82,
-      condition: "Rainy",
-      hightemp_f: 84,
-      lowtemp_f: 72,
-      localTime: "2026-02-15 03:25",
-    },
-  ]);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
-  const [query, setQuery] = useState(selectedLocation.city);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [recentLocations, setRecentLocations] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("recentLocations")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Try to get user location on first load
+  // Getting the current location
   useEffect(() => {
     if (!navigator.geolocation) return;
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => setQuery(`${pos.coords.latitude},${pos.coords.longitude}`),
+      () => {
+        setQuery("Your Current Location");
+      },
       () => console.log("Geolocation denied or failed"),
     );
   }, []);
 
-  // When selectedLocation changes, update query
+  // Save recent locations to localStorage whenever they change
   useEffect(() => {
-    if (selectedLocation) setQuery(selectedLocation.city);
+    localStorage.setItem("recentLocations", JSON.stringify(recentLocations));
+  }, [recentLocations]);
+
+  // When user clicks a location in sidebar
+  useEffect(() => {
+    if (selectedLocation?.city) {
+      setQuery(selectedLocation.city);
+    }
   }, [selectedLocation]);
 
   return (
     <div className="d-flex vh-100">
       <LocationsSideBar
-        locations={locations}
+        currentLocation={currentLocation}
+        recentLocations={recentLocations}
         selectedLocation={selectedLocation}
         onSelectLocation={setSelectedLocation}
-        onAddLocation={(loc) => setLocations([...locations, loc])}
         onSearch={setQuery}
       />
+
       <main className="w-100 d-flex">
-        <WeatherFetcher
-          query={query}
-          onData={setWeather}
-          onLoading={setLoading}
-          onError={setError}
-        />
+        {query && (
+          <WeatherFetcher
+            query={query}
+            onData={(data) => {
+              const locationData = {
+                city: data.location.name,
+                temp: data.current.temp_f,
+                condition: data.current.condition.text,
+                hightemp_f: data.forecast.forecastday[0].day.maxtemp_f,
+                lowtemp_f: data.forecast.forecastday[0].day.mintemp_f,
+                localTime: data.location.localtime,
+              };
+
+              // Update only current location
+              if (query === "Your Current Location") {
+                setCurrentLocation(locationData);
+                setSelectedLocation(locationData);
+              } else {
+                // Add to recent locations, max 5, remove duplicates
+                setRecentLocations((prev) => {
+                  const filtered = prev.filter(
+                    (loc) =>
+                      loc.city.toLowerCase() !==
+                      locationData.city.toLowerCase(),
+                  );
+                  const updated = [locationData, ...filtered];
+                  return updated.slice(0, MAX_RECENTS);
+                });
+
+                setSelectedLocation(locationData);
+              }
+
+              setWeather(data);
+            }}
+            onLoading={setLoading}
+            onError={setError}
+          />
+        )}
+
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
+
         {weather && (
           <div className="container-fluid p-0 d-flex flex-column w-100">
-            <Header weather={weather} />
+            <Header
+              weather={weather}
+              isCurrent={selectedLocation === currentLocation}
+            />
           </div>
         )}
       </main>
