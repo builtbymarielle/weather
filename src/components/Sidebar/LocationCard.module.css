@@ -1,5 +1,42 @@
-.locCard{
-    text-align: start;
+.locCard {
+  text-align: start;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+  cursor: pointer;
+}
+
+.locCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 px 20px rgba(0, 0, 0, 0.3);
+}
+
+.overlay {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1 !important;
+  transition: opacity 0.3s ease;
+}
+
+.selected {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.locCard > * {
+  position: relative; /* content above overlay */
+  z-index: 2;
 }
 
 .locCard.bgSunrise {
@@ -18,26 +55,26 @@
   background: var(--bg-nighttime);
 }
 
-.locCard small{
+.locCard small {
   font-size: 12px;
   font-weight: 200;
 }
 
-.locCard svg{
+.locCard svg {
   font-size: 12px;
 }
 
-.locCard h5{
+.locCard h5 {
   font-size: 16px;
   font-weight: 600;
 }
 
-.locCard h1{
+.locCard h1 {
   font-size: 40px;
   font-weight: 600;
 }
 
-.locCard p{
+.locCard p {
   font-size: 12px;
   font-weight: 400;
 }
