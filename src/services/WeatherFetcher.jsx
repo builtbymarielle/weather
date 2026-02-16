@@ -29,7 +29,7 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
             temp_f: 48.2,
             is_day: 1,
             condition: {
-              text: "Rainy",
+              text: "rainy",
               icon: "//cdn.weatherapi.com/weather/64x64/day/116.png",
               code: 1003,
             },
@@ -47,7 +47,7 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
             feelslike_f: 45.5,
             vis_km: 10.0,
             vis_miles: 6.0,
-            uv: 2.0,
+            uv: 8.0,
             gust_mph: 7.8,
             gust_kph: 12.6,
             hightemp_c: 23,

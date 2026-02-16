@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
+import Header from "./components/Main/Header";
 import "./styles/App.css";
 
 function App() {
@@ -78,14 +79,7 @@ function App() {
         {error && <p className="text-center text-red-500">{error}</p>}
         {weather && (
           <div className="container-fluid p-3">
-            <h2 className="mb-4">{weather.location.name}</h2>
-            <p className="mb-2">{weather.current.condition.text}</p>
-            <p className="mb-2">Temperature: {weather.current.temp_f}°F</p>
-            <p className="mb-2">
-              High: {weather.current.hightemp_f}°F, Low:{" "}
-              {weather.current.lowtemp_f}°F
-            </p>
-            <p className="mb-2">Local Time: {weather.location.localtime}</p>
+            <Header weather={weather} />
           </div>
         )}
       </main>
