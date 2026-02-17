@@ -26,7 +26,6 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
         if (!res.ok) throw new Error("Failed to fetch weather");
         const data = await res.json();
         onData(data);
-        console.log(data);
       } catch (err) {
         if (err.name !== "AbortError") {
           onError(err.message || "Could not load weather.");
