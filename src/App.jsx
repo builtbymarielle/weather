@@ -5,30 +5,43 @@ import Header from "./components/Main/Header";
 import "./styles/App.css";
 
 const MAX_RECENTS = 5;
+const MAX_AGE = 1000 * 60 * 15; // 15 minutes
+
+// Prevent storing "Current Location" in recents
+function isCurrentLocationLabel(city) {
+  if (!city || typeof city !== "string") return false;
+  const normalized = city.toLowerCase().trim();
+  return normalized === "current location";
+}
 
 function App() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [recentLocations, setRecentLocations] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("recentLocations")) || [];
+      const stored = JSON.parse(localStorage.getItem("recentLocations")) || [];
+      return stored
+        .filter((loc) => !isCurrentLocationLabel(loc?.city))
+        .map((loc) => ({
+          ...loc,
+          needsRefresh: Date.now() - (loc.lastUpdated || 0) > MAX_AGE,
+        }));
     } catch {
       return [];
     }
   });
+
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Getting the current location
+  // Get current location
   useEffect(() => {
     if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
-      () => {
-        setQuery("Your Current Location");
-      },
+      () => setQuery("Current Location"),
       () => console.log("Geolocation denied or failed"),
     );
   }, []);
@@ -38,12 +51,39 @@ function App() {
     localStorage.setItem("recentLocations", JSON.stringify(recentLocations));
   }, [recentLocations]);
 
-  // When user clicks a location in sidebar
+  // Auto-refresh old recent locations
   useEffect(() => {
-    if (selectedLocation?.city) {
-      setQuery(selectedLocation.city);
+    const interval = setInterval(() => {
+      setRecentLocations((prev) => {
+        return prev.map((loc) => {
+          const isStale = Date.now() - (loc.lastUpdated || 0) > MAX_AGE;
+          if (isStale) {
+            refreshLocation(loc.city);
+          }
+          return { ...loc, needsRefresh: isStale };
+        });
+      });
+    }, 60 * 1000); // check every minute
+
+    return () => clearInterval(interval);
+  }, [recentLocations]);
+
+  // Trigger WeatherFetcher to refresh a location
+  const refreshLocation = (city) => {
+    setQuery(city);
+  };
+
+  // Handle selecting a location
+  const handleSelectLocation = (loc) => {
+    if (!loc) return;
+
+    if (loc.fullData && !loc.needsRefresh) {
+      setSelectedLocation(loc);
+      setWeather(loc.fullData);
+    } else {
+      setQuery(loc.city);
     }
-  }, [selectedLocation]);
+  };
 
   return (
     <div className="d-flex vh-100">
@@ -51,7 +91,7 @@ function App() {
         currentLocation={currentLocation}
         recentLocations={recentLocations}
         selectedLocation={selectedLocation}
-        onSelectLocation={setSelectedLocation}
+        onSelectLocation={handleSelectLocation}
         onSearch={setQuery}
       />
 
@@ -60,29 +100,44 @@ function App() {
           <WeatherFetcher
             query={query}
             onData={(data) => {
+              const isCurrentLocation = query === "Current Location";
               const locationData = {
-                city: data.location.name,
-                temp: data.current.temp_f,
-                condition: data.current.condition.text,
-                hightemp_f: data.forecast.forecastday[0].day.maxtemp_f,
-                lowtemp_f: data.forecast.forecastday[0].day.mintemp_f,
-                localTime: data.location.localtime,
+                city: isCurrentLocation
+                  ? "Current Location"
+                  : data.location.name,
+                actualCityName: isCurrentLocation ? data.location.name : null,
+                fullData: data,
+                lastUpdated: Date.now(),
+                needsRefresh: false,
               };
 
-              // Update only current location
-              if (query === "Your Current Location") {
+              if (isCurrentLocation) {
                 setCurrentLocation(locationData);
                 setSelectedLocation(locationData);
               } else {
-                // Add to recent locations, max 5, remove duplicates
                 setRecentLocations((prev) => {
-                  const filtered = prev.filter(
-                    (loc) =>
-                      loc.city.toLowerCase() !==
-                      locationData.city.toLowerCase(),
+                  const withoutCurrent = prev.filter(
+                    (loc) => !isCurrentLocationLabel(loc?.city),
                   );
-                  const updated = [locationData, ...filtered];
-                  return updated.slice(0, MAX_RECENTS);
+
+                  const updatedList = withoutCurrent.map((loc) =>
+                    loc.city.toLowerCase() === locationData.city.toLowerCase()
+                      ? locationData // replace old data
+                      : loc,
+                  );
+
+                  // Add to recent locations, max 5, remove duplicates
+                  if (
+                    !updatedList.some(
+                      (loc) =>
+                        loc.city.toLowerCase() ===
+                        locationData.city.toLowerCase(),
+                    )
+                  ) {
+                    updatedList.unshift(locationData);
+                  }
+
+                  return updatedList.slice(0, MAX_RECENTS);
                 });
 
                 setSelectedLocation(locationData);
