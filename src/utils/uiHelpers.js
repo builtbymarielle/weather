@@ -40,3 +40,32 @@ export function parseTimeWith12Hour(timeStr) {
 
   return { hour24, time12 };
 }
+
+/**
+ * Get current time in a given timezone; use for live-updating display.
+ * @param {string} tzId - IANA timezone (e.g. "America/New_York")
+ * @returns {{ hour24: number, time12: string }}
+ */
+export function getLiveTimeInZone(tzId) {
+  if (!tzId) return { hour24: 12, time12: "12:00PM" };
+  try {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-US", {
+      timeZone: tzId,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const [hourStr, minuteStr] = timeStr.split(":");
+    const hour24 = parseInt(hourStr, 10) || 12;
+    const minute = parseInt(minuteStr, 10) || 0;
+    const period = hour24 >= 12 ? "PM" : "AM";
+    let hour12 = hour24 % 12;
+    if (hour12 === 0) hour12 = 12;
+    const time12 = `${hour12}:${minute.toString().padStart(2, "0")}${period}`;
+    return { hour24, time12 };
+  } catch {
+    return { hour24: 12, time12: "12:00PM" };
+  }
+}

@@ -1,10 +1,28 @@
 import { useEffect } from "react";
 
-// This component handles fetching weather data
-export default function WeatherFetcher({ query, onData, onLoading, onError }) {
+const CACHE_FRESH_MS = 60 * 60 * 1000; // 1 hour – use cache, no API call
+
+// This component handles fetching weather data; uses cache when fresh to avoid extra API calls
+export default function WeatherFetcher({
+  query,
+  hourRefreshTrigger,
+  cachedData,
+  cachedAt,
+  onData,
+  onLoading,
+  onError,
+}) {
   const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
   useEffect(() => {
+    const useCache =
+      cachedData && cachedAt != null && Date.now() - cachedAt < CACHE_FRESH_MS;
+
+    if (useCache) {
+      onData(cachedData);
+      return;
+    }
+
     const abortController = new AbortController();
     const fetchWeather = async () => {
       try {
@@ -26,7 +44,6 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
         if (!res.ok) throw new Error("Failed to fetch weather");
         const data = await res.json();
         onData(data);
-        console.log(data);
       } catch (err) {
         if (err.name !== "AbortError") {
           onError(err.message || "Could not load weather.");
@@ -38,7 +55,7 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
 
     fetchWeather();
     return () => abortController.abort();
-  }, [query]);
+  }, [query, hourRefreshTrigger]);
 
   return null;
 }

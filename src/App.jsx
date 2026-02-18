@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
 
 const MAX_RECENTS = 5;
-const MAX_AGE = 1000 * 60 * 15; // 15 minutes
 
 // Prevent storing "Current Location" in recents
 function isCurrentLocationLabel(city) {
@@ -19,12 +18,7 @@ function App() {
   const [recentLocations, setRecentLocations] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem("recentLocations")) || [];
-      return stored
-        .filter((loc) => !isCurrentLocationLabel(loc?.city))
-        .map((loc) => ({
-          ...loc,
-          needsRefresh: Date.now() - (loc.lastUpdated || 0) > MAX_AGE,
-        }));
+      return stored.filter((loc) => !isCurrentLocationLabel(loc?.city));
     } catch {
       return [];
     }
@@ -35,6 +29,39 @@ function App() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [hourRefreshTrigger, setHourRefreshTrigger] = useState(0);
+  const lastFetchedAtRef = useRef(null);
+
+  // When user returns to tab after long absence, refresh weather if data is stale
+  useEffect(() => {
+    const STALE_MS = 60 * 60 * 1000; // 1 hour
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      const last = lastFetchedAtRef.current;
+      if (last != null && Date.now() - last > STALE_MS) {
+        setHourRefreshTrigger((t) => t + 1);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
+  // Refresh weather once per hour on the hour (card content: temp, condition, etc.)
+  useEffect(() => {
+    let lastTriggeredHour = -1;
+    const checkAndTrigger = () => {
+      const now = new Date();
+      const min = now.getMinutes();
+      const hour = now.getHours();
+      if (min === 0 && hour !== lastTriggeredHour) {
+        lastTriggeredHour = hour;
+        setHourRefreshTrigger((t) => t + 1);
+      }
+    };
+    checkAndTrigger();
+    const interval = setInterval(checkAndTrigger, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Get current location
   useEffect(() => {
@@ -51,37 +78,13 @@ function App() {
     localStorage.setItem("recentLocations", JSON.stringify(recentLocations));
   }, [recentLocations]);
 
-  // Auto-refresh old recent locations
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRecentLocations((prev) => {
-        return prev.map((loc) => {
-          const isStale = Date.now() - (loc.lastUpdated || 0) > MAX_AGE;
-          if (isStale) {
-            refreshLocation(loc.city);
-          }
-          return { ...loc, needsRefresh: isStale };
-        });
-      });
-    }, 60 * 1000); // check every minute
-
-    return () => clearInterval(interval);
-  }, [recentLocations]);
-
-  // Trigger WeatherFetcher to refresh a location
-  const refreshLocation = (city) => {
-    setQuery(city);
-  };
-
-  // Handle selecting a location
+  // Handle selecting a location: show cached data if available, then refresh in background
   const handleSelectLocation = (loc) => {
     if (!loc) return;
-
-    if (loc.fullData && !loc.needsRefresh) {
+    setQuery(loc.city);
+    if (loc.fullData) {
       setSelectedLocation(loc);
       setWeather(loc.fullData);
-    } else {
-      setQuery(loc.city);
     }
   };
 
@@ -99,7 +102,19 @@ function App() {
         {query && (
           <WeatherFetcher
             query={query}
+            hourRefreshTrigger={hourRefreshTrigger}
+            cachedData={
+              selectedLocation?.city === query
+                ? selectedLocation?.fullData
+                : null
+            }
+            cachedAt={
+              selectedLocation?.city === query
+                ? (selectedLocation?.lastUpdated ?? null)
+                : null
+            }
             onData={(data) => {
+              lastFetchedAtRef.current = Date.now();
               const isCurrentLocation = query === "Current Location";
               const locationData = {
                 city: isCurrentLocation
@@ -108,7 +123,6 @@ function App() {
                 actualCityName: isCurrentLocation ? data.location.name : null,
                 fullData: data,
                 lastUpdated: Date.now(),
-                needsRefresh: false,
               };
 
               if (isCurrentLocation) {

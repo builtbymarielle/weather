@@ -1,11 +1,15 @@
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
   faLocationArrow,
-  faSync,
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./LocationCard.module.css";
-import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
+import {
+  getBgTheme,
+  getLiveTimeInZone,
+  parseTimeWith12Hour,
+} from "../../utils/uiHelpers";
 
 export default function LocationCard({
   city,
@@ -13,9 +17,31 @@ export default function LocationCard({
   selected,
   isCurrent,
   fullData,
-  needsRefresh,
 }) {
-  const { hour24, time12 } = parseTimeWith12Hour(fullData.location.localtime);
+  const tzId = fullData?.location?.tz_id;
+  const fallback = parseTimeWith12Hour(fullData?.location?.localtime);
+
+  const [liveTime, setLiveTime] = useState(() =>
+    tzId ? getLiveTimeInZone(tzId) : fallback,
+  );
+
+  // Update card time every minute or when its visible
+  useEffect(() => {
+    if (!tzId) return;
+    const update = () => setLiveTime(getLiveTimeInZone(tzId));
+    update();
+    const interval = setInterval(update, 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") update();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [tzId]);
+
+  const { hour24, time12 } = tzId ? liveTime : fallback;
   const bgTheme = getBgTheme(hour24, styles);
 
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
@@ -28,7 +54,6 @@ export default function LocationCard({
       {!selected && <div className={styles.overlay}></div>} {/* overlay */}
       <div className="d-flex justify-content-between gap-2">
         {time12 && <small>{time12}</small>}
-        {needsRefresh && <FontAwesomeIcon icon={faSync} className="me-1" />}
       </div>
       <div className="d-flex align-items-baseline">
         <FontAwesomeIcon icon={locationIcon} className="me-1" />

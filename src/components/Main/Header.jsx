@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -9,22 +9,46 @@ import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
-import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
+import {
+  getBgTheme,
+  getLiveTimeInZone,
+  parseTimeWith12Hour,
+} from "../../utils/uiHelpers";
 
 export default function Header({ weather, isCurrent }) {
   const [recommendation, setRecommendation] = useState("");
   const [weatherIconClass, setWeatherIconClass] = useState("");
+  const tzId = weather?.location?.tz_id;
+  const fallback = parseTimeWith12Hour(weather?.location?.localtime);
+  const [liveTime, setLiveTime] = useState(() =>
+    tzId ? getLiveTimeInZone(tzId) : fallback,
+  );
+
+  // Update header time every minute or when its visible
+  useEffect(() => {
+    if (!tzId) return;
+    const update = () => setLiveTime(getLiveTimeInZone(tzId));
+    update();
+    const interval = setInterval(update, 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") update();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [tzId]);
 
   const locationName = weather.location.name;
   const currentCondition = weather.current.condition.text;
   const currentTemp = weather.current.temp_f;
   const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
   const lowTemp = weather.forecast.forecastday[0].day.mintemp_f;
-  const localTime = weather.location.localtime;
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
 
-  const { hour24, time12 } = parseTimeWith12Hour(localTime);
+  const { hour24, time12 } = tzId ? liveTime : fallback;
   const bgTheme = getBgTheme(hour24, styles);
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
@@ -53,7 +77,7 @@ export default function Header({ weather, isCurrent }) {
       )}
 
       <p>
-        High: {highTemp}°F | Low: {lowTemp}°F | Local Time: {localTime}
+        High: {highTemp}°F | Low: {lowTemp}°F | Local Time: {time12}
       </p>
       <p className={styles.recommendation}>{recommendation}</p>
     </header>
