@@ -30,13 +30,27 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hourRefreshTrigger, setHourRefreshTrigger] = useState(0);
+  const [clockTick, setClockTick] = useState(() => Date.now());
   const lastFetchedAtRef = useRef(null);
+  const recentLocationsRef = useRef(recentLocations);
+
+  // Keep ref in sync so onData always merges against latest list (avoids losing items when multiple updates run)
+  useEffect(() => {
+    recentLocationsRef.current = recentLocations;
+  }, [recentLocations]);
+
+  // Single clock tick for all cards: one update per minute (avoids each card setState causing re-render cascades)
+  useEffect(() => {
+    const id = setInterval(() => setClockTick(Date.now()), 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // When user returns to tab after long absence, refresh weather if data is stale
   useEffect(() => {
     const STALE_MS = 60 * 60 * 1000; // 1 hour
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
+      setClockTick(Date.now());
       const last = lastFetchedAtRef.current;
       if (last != null && Date.now() - last > STALE_MS) {
         setHourRefreshTrigger((t) => t + 1);
@@ -73,9 +87,16 @@ function App() {
     );
   }, []);
 
-  // Save recent locations to localStorage whenever they change
+  // Save recent locations to localStorage whenever they change (except "Current Location")
   useEffect(() => {
-    localStorage.setItem("recentLocations", JSON.stringify(recentLocations));
+    const toSave = recentLocations.filter(
+      (loc) => !isCurrentLocationLabel(loc?.city),
+    );
+    try {
+      localStorage.setItem("recentLocations", JSON.stringify(toSave));
+    } catch (e) {
+      console.warn("Could not save recent locations to localStorage", e);
+    }
   }, [recentLocations]);
 
   // Handle selecting a location: show cached data if available, then refresh in background
@@ -96,6 +117,7 @@ function App() {
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectLocation}
         onSearch={setQuery}
+        clockTick={clockTick}
       />
 
       <main className="w-100 d-flex">
@@ -129,30 +151,25 @@ function App() {
                 setCurrentLocation(locationData);
                 setSelectedLocation(locationData);
               } else {
-                setRecentLocations((prev) => {
-                  const withoutCurrent = prev.filter(
-                    (loc) => !isCurrentLocationLabel(loc?.city),
-                  );
-
-                  const updatedList = withoutCurrent.map((loc) =>
-                    loc.city.toLowerCase() === locationData.city.toLowerCase()
-                      ? locationData // replace old data
-                      : loc,
-                  );
-
-                  // Add to recent locations, max 5, remove duplicates
-                  if (
-                    !updatedList.some(
-                      (loc) =>
-                        loc.city.toLowerCase() ===
-                        locationData.city.toLowerCase(),
-                    )
-                  ) {
-                    updatedList.unshift(locationData);
-                  }
-
-                  return updatedList.slice(0, MAX_RECENTS);
-                });
+                // Always merge against latest list (ref) so we never drop locations when multiple onData run close together
+                const prev = recentLocationsRef.current;
+                const updatedList = prev.map((loc) =>
+                  loc.city?.toLowerCase() === locationData.city.toLowerCase()
+                    ? locationData
+                    : loc,
+                );
+                if (
+                  !updatedList.some(
+                    (loc) =>
+                      loc.city?.toLowerCase() ===
+                      locationData.city.toLowerCase(),
+                  )
+                ) {
+                  updatedList.unshift(locationData);
+                }
+                const next = updatedList.slice(0, MAX_RECENTS);
+                recentLocationsRef.current = next;
+                setRecentLocations(next);
 
                 setSelectedLocation(locationData);
               }
@@ -172,6 +189,7 @@ function App() {
             <Header
               weather={weather}
               isCurrent={selectedLocation === currentLocation}
+              clockTick={clockTick}
             />
           </div>
         )}

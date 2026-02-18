@@ -15,30 +15,13 @@ import {
   parseTimeWith12Hour,
 } from "../../utils/uiHelpers";
 
-export default function Header({ weather, isCurrent }) {
+export default function Header({ weather, isCurrent, clockTick }) {
   const [recommendation, setRecommendation] = useState("");
   const [weatherIconClass, setWeatherIconClass] = useState("");
   const tzId = weather?.location?.tz_id;
   const fallback = parseTimeWith12Hour(weather?.location?.localtime);
-  const [liveTime, setLiveTime] = useState(() =>
-    tzId ? getLiveTimeInZone(tzId) : fallback,
-  );
-
-  // Update header time every minute or when its visible
-  useEffect(() => {
-    if (!tzId) return;
-    const update = () => setLiveTime(getLiveTimeInZone(tzId));
-    update();
-    const interval = setInterval(update, 60 * 1000);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") update();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [tzId]);
+  const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
+  const bgTheme = getBgTheme(hour24, styles);
 
   const locationName = weather.location.name;
   const currentCondition = weather.current.condition.text;
@@ -47,9 +30,6 @@ export default function Header({ weather, isCurrent }) {
   const lowTemp = weather.forecast.forecastday[0].day.mintemp_f;
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
-
-  const { hour24, time12 } = tzId ? liveTime : fallback;
-  const bgTheme = getBgTheme(hour24, styles);
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
   useEffect(() => {
