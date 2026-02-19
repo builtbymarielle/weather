@@ -11,7 +11,7 @@ export function getWeatherIconClass(conditionText, isDay) {
 
   if (text.includes("sunny")) return "wi-day-sunny";
   if (text.includes("clear")) return isDay ? "wi-day-sunny" : "wi-night-clear";
-  if (text.includes("cloud"))
+  if (text.includes("cloud") || text.includes("overcast"))
     return isDay ? "wi-day-cloudy" : "wi-night-cloudy";
   if (text.includes("rain") || text.includes("shower"))
     return isDay ? "wi-day-rain" : "wi-night-rain";

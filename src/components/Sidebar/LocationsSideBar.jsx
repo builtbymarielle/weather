@@ -14,6 +14,7 @@ function LocationsSideBar({
   selectedLocation,
   onSelectLocation,
   onSearch,
+  clockTick,
 }) {
   return (
     <aside className={`sidebar ${styles.bgColor} p-3`}>
@@ -40,6 +41,7 @@ function LocationsSideBar({
                 {...currentLocation}
                 selected={selectedLocation === currentLocation}
                 isCurrent={true}
+                clockTick={clockTick}
               />
             </button>
           </li>
@@ -51,20 +53,25 @@ function LocationsSideBar({
         </li>
 
         {recentLocations && recentLocations.length > 0 ? (
-          recentLocations.map((loc, idx) => (
-            <li key={loc.city + idx} className="nav-item mb-2">
-              <button
-                className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
-                onClick={() => onSelectLocation(loc)}
-              >
-                <LocationCard
-                  {...loc}
-                  selected={selectedLocation?.city === loc.city}
-                  fullData={loc.fullData}
-                />
-              </button>
-            </li>
-          ))
+          recentLocations
+            .filter(
+              (loc) => loc?.city?.toLowerCase()?.trim() !== "current location",
+            )
+            .map((loc, idx) => (
+              <li key={loc.city + idx} className="nav-item mb-2">
+                <button
+                  className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
+                  onClick={() => onSelectLocation(loc)}
+                >
+                  <LocationCard
+                    {...loc}
+                    selected={selectedLocation?.city === loc.city}
+                    fullData={loc.fullData}
+                    clockTick={clockTick}
+                  />
+                </button>
+              </li>
+            ))
         ) : (
           <p className="text-white">No locations saved.</p>
         )}
