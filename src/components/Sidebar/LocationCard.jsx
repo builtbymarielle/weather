@@ -1,3 +1,7 @@
+/**
+ * LocationCard — One card in the sidebar: city name, local time, temp, condition, high/low.
+ * Used for both "current location" (Favorites) and recent locations. Needs fullData for full display; otherwise shows "No weather data".
+ */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -18,15 +22,20 @@ export default function LocationCard({
   fullData,
   clockTick,
 }) {
+  // Getting the timezone ID and local time for the location
   const tzId = fullData?.location?.tz_id;
+  // If the timezone ID is not found, we use the fallback time
   const fallback = parseTimeWith12Hour(fullData?.location?.localtime);
   const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
+  // Getting the background theme for the location. This is based on the hour of day
   const bgTheme = getBgTheme(hour24, styles);
 
+  // if the location is current use arrow icon, otherwise use location dot icon
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
+  // the current location card shows "Current Location" and in small text the city name
   const showBoth = isCurrent && actualCityName;
 
-  // If we don't have current weather data or just bad data, show a placeholder card with just the city name
+  // If the location has no weather data, we show a placeholder card
   if (!fullData?.current) {
     return (
       <div
@@ -42,6 +51,7 @@ export default function LocationCard({
     );
   }
 
+  // If the location has weather data, we show the card with the data!
   return (
     <div
       className={`${styles.locCard} ${bgTheme} rounded p-2 w-100 text-white ${selected ? styles.selected : ""} `}

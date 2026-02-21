@@ -26,3 +26,11 @@
   color: var(--text-white-trans);
   font-size: 12px;
 }
+
+.customLocationButton {
+  font-size: 12px;
+}
+.customLocationButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

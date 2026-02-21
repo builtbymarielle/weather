@@ -78,3 +78,11 @@
   font-size: 12px;
   font-weight: 400;
 }
+
+.customLocationButton {
+  font-size: 12px;
+}
+
+.customLocationButton:disabled {
+  opacity: 0.5;
+}

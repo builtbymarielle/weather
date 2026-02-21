@@ -1,8 +1,12 @@
+/**
+ * SearchBar — Search input for city name. On submit, calls onSearch(location) (App sets query and fetches weather).
+ */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import styles from "./SearchBar.module.css";
 
 export default function SearchBar({ onSearch }) {
+  // When the user submits the form, we get the location from the form data and call the onSearch function
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);

@@ -1,12 +1,23 @@
+/**
+ * App.jsx — Root component for the weather app.
+ *
+ * Flow:
+ * - Sidebar shows: saved current location (from localStorage), "Use my location" button, and recent location searches.
+ * - When user picks a location or searches, we set `query`. WeatherFetcher runs for that query and calls onData with API data.
+ * - We store current location and recents in state; current location and recents are persisted to localStorage.
+ * - Header shows weather for the currently selected location (from `weather` state).
+ */
+
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
 
+// the max of recent location searches is 5
 const MAX_RECENTS = 5;
 
-// Prevent storing "Current Location" in recents
+/** Returns true if the city label is "Current Location" (so we don't save it in recents). */
 function isCurrentLocationLabel(city) {
   if (!city || typeof city !== "string") return false;
   const normalized = city.toLowerCase().trim();
@@ -14,7 +25,21 @@ function isCurrentLocationLabel(city) {
 }
 
 function App() {
-  const [currentLocation, setCurrentLocation] = useState(null);
+  // Go and get the current Location. If it is stored in the localStorage use that.
+  // Else leave empty...user doesn't have a current location or hasn't triggered to get it.
+  const [currentLocation, setCurrentLocation] = useState(() => {
+    try {
+      const stored = localStorage.getItem("currentLocation");
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      return parsed && (parsed.city || parsed.fullData) ? parsed : null;
+    } catch {
+      return null;
+    }
+  });
+  const [gettingLocation, setGettingLocation] = useState(false);
+  // Go and get users recent Locations in localStorage
+  // If they don't have anything, return nothing
   const [recentLocations, setRecentLocations] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem("recentLocations")) || [];
@@ -24,22 +49,42 @@ function App() {
     }
   });
 
+  // UI, what location card is selected?
   const [selectedLocation, setSelectedLocation] = useState(null);
+  // The search query
   const [query, setQuery] = useState("");
+  const [currentLocationRefreshTrigger, setCurrentLocationRefreshTrigger] =
+    useState(0);
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // "Use my location" button: 60s cooldown to prevent spam
+  const [locationButtonDisabled, setLocationButtonDisabled] = useState(false);
+
+  // --- Hourly refresh and clock (for cards and header) ---
   const [hourRefreshTrigger, setHourRefreshTrigger] = useState(0);
   const [clockTick, setClockTick] = useState(() => Date.now());
+
+  // --- Refs (don't trigger re-renders; used for fresh values inside callbacks) ---
   const lastFetchedAtRef = useRef(null);
   const recentLocationsRef = useRef(recentLocations);
+  const locationButtonCooldownTimeoutRef = useRef(null);
+
+  // On load, show saved current location from localStorage without calling the API
+  useEffect(() => {
+    if (currentLocation?.fullData) {
+      setSelectedLocation(currentLocation);
+      setWeather(currentLocation.fullData);
+    }
+  }, []);
 
   // Keep ref in sync so onData always merges against latest list (avoids losing items when multiple updates run)
   useEffect(() => {
     recentLocationsRef.current = recentLocations;
   }, [recentLocations]);
 
-  // Single clock tick for all cards: one update per minute (avoids each card setState causing re-render cascades)
+  // Update clock time for all location cards every minute
   useEffect(() => {
     const id = setInterval(() => setClockTick(Date.now()), 60 * 1000);
     return () => clearInterval(id);
@@ -47,7 +92,7 @@ function App() {
 
   // When user returns to tab after long absence, refresh weather if data is stale
   useEffect(() => {
-    const STALE_MS = 60 * 60 * 1000; // 1 hour
+    const STALE_MS = 60 * 60 * 1000;
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       setClockTick(Date.now());
@@ -60,7 +105,7 @@ function App() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
-  // Refresh weather once per hour on the hour (card content: temp, condition, etc.)
+  // Refresh weather once per hour on the hour (this will fetch from the API)
   useEffect(() => {
     let lastTriggeredHour = -1;
     const checkAndTrigger = () => {
@@ -77,14 +122,55 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Get current location
-  useEffect(() => {
-    if (!navigator.geolocation) return;
+  /**
+   * "Use my location" / "Update current location" button handler.
+   * Disables the button for 60s (cooldown), gets GPS, sets query to "Current Location" and bumps refresh trigger so WeatherFetcher fetches.
+   */
+  const handleGetCurrentLocation = () => {
+    // If the button is disabled or geolocation is not supported, return nothing
+    if (locationButtonDisabled) return;
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
 
+    // Else, we are getting the current location. Setting the button to disabled
+    setLocationButtonDisabled(true);
+    // Starting the cooldown
+    if (locationButtonCooldownTimeoutRef.current) {
+      clearTimeout(locationButtonCooldownTimeoutRef.current);
+    }
+    locationButtonCooldownTimeoutRef.current = setTimeout(() => {
+      setLocationButtonDisabled(false);
+      locationButtonCooldownTimeoutRef.current = null;
+    }, 60 * 1000);
+
+    // Set loading to True, there are no errors
+    setGettingLocation(true);
+    setError(null);
+    // Setting query to "Current Location", setting refreshTrigger, and loading is done
     navigator.geolocation.getCurrentPosition(
-      () => setQuery("Current Location"),
-      () => console.log("Geolocation denied or failed"),
+      () => {
+        setQuery("Current Location");
+        setCurrentLocationRefreshTrigger((t) => t + 1);
+        setGettingLocation(false);
+      },
+      () => {
+        setError(
+          "Could not get your location. Check permissions or try again.",
+        );
+        setGettingLocation(false);
+      },
     );
+  };
+
+  // Clear cooldown timeout on unmount so we don't call setState after unmount
+  useEffect(() => {
+    return () => {
+      if (locationButtonCooldownTimeoutRef.current) {
+        clearTimeout(locationButtonCooldownTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Save recent locations to localStorage whenever they change (except "Current Location")
@@ -99,7 +185,11 @@ function App() {
     }
   }, [recentLocations]);
 
-  // Handle selecting a location: show cached data if available, then refresh in background
+  /**
+   * When user clicks a location in the sidebar: set query (so WeatherFetcher runs).
+   * If we already have fullData for that location, also set selected + weather so UI shows cache immediately;
+   * WeatherFetcher will still run and may use cache if fresh, or refetch.
+   */
   const handleSelectLocation = (loc) => {
     if (!loc) return;
     setQuery(loc.city);
@@ -118,6 +208,10 @@ function App() {
         onSelectLocation={handleSelectLocation}
         onSearch={setQuery}
         clockTick={clockTick}
+        onGetCurrentLocation={handleGetCurrentLocation}
+        locationButtonDisabled={locationButtonDisabled}
+        gettingLocation={gettingLocation}
+        isCurrentLocationLoading={query === "Current Location" && loading}
       />
 
       <main className="w-100 d-flex">
@@ -125,6 +219,11 @@ function App() {
           <WeatherFetcher
             query={query}
             hourRefreshTrigger={hourRefreshTrigger}
+            currentLocationRefreshTrigger={
+              query === "Current Location"
+                ? currentLocationRefreshTrigger
+                : undefined
+            }
             cachedData={
               selectedLocation?.city === query
                 ? selectedLocation?.fullData
@@ -150,8 +249,19 @@ function App() {
               if (isCurrentLocation) {
                 setCurrentLocation(locationData);
                 setSelectedLocation(locationData);
+                try {
+                  localStorage.setItem(
+                    "currentLocation",
+                    JSON.stringify(locationData),
+                  );
+                } catch (e) {
+                  console.warn(
+                    "Could not save current location to localStorage",
+                    e,
+                  );
+                }
               } else {
-                // Always merge against latest list (ref) so we never drop locations when multiple onData run close together
+                // Merge this city into recents (update if exists, else add); cap at MAX_RECENTS. Use ref so we don't lose updates when multiple onData run close together.
                 const prev = recentLocationsRef.current;
                 const updatedList = prev.map((loc) =>
                   loc.city?.toLowerCase() === locationData.city.toLowerCase()
