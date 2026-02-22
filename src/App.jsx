@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
+import { reverseGeocodeToCity } from "./services/ReverseGeocodeToCity";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
@@ -53,6 +54,8 @@ function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   // The search query
   const [query, setQuery] = useState("");
+  const [lat, setLat] = useState("");
+  const [lon, setLon] = useState("");
   const [currentLocationRefreshTrigger, setCurrentLocationRefreshTrigger] =
     useState(0);
   const [weather, setWeather] = useState(null);
@@ -150,7 +153,11 @@ function App() {
     setError(null);
     // Setting query to "Current Location", setting refreshTrigger, and loading is done
     navigator.geolocation.getCurrentPosition(
-      () => {
+      function (position) {
+        let formattedLat = position.coords.latitude;
+        let formattedLon = position.coords.longitude;
+        setLat(formattedLat);
+        setLon(formattedLon);
         setQuery("Current Location");
         setCurrentLocationRefreshTrigger((t) => t + 1);
         setGettingLocation(false);
@@ -193,6 +200,8 @@ function App() {
   const handleSelectLocation = (loc) => {
     if (!loc) return;
     setQuery(loc.city);
+    setLat("");
+    setLon("");
     if (loc.fullData) {
       setSelectedLocation(loc);
       setWeather(loc.fullData);
@@ -218,6 +227,16 @@ function App() {
         {query && (
           <WeatherFetcher
             query={query}
+            currentLocationLat={
+              query === "Current Location"
+                ? lat || currentLocation?.fullData?.location?.lat
+                : undefined
+            }
+            currentLocationLon={
+              query === "Current Location"
+                ? lon || currentLocation?.fullData?.location?.lon
+                : undefined
+            }
             hourRefreshTrigger={hourRefreshTrigger}
             currentLocationRefreshTrigger={
               query === "Current Location"
@@ -234,17 +253,31 @@ function App() {
                 ? (selectedLocation?.lastUpdated ?? null)
                 : null
             }
-            onData={(data) => {
+            onData={async (data) => {
               lastFetchedAtRef.current = Date.now();
               const isCurrentLocation = query === "Current Location";
+              // For current location, resolve lat/lon to city name (not neighborhood) via reverse geocoding
+              let actualCityName = isCurrentLocation
+                ? data.location.name
+                : null;
+              if (
+                isCurrentLocation &&
+                data?.location?.lat != null &&
+                data?.location?.lon != null
+              ) {
+                const cityName = await reverseGeocodeToCity(lat, lon);
+                if (cityName) actualCityName = cityName;
+              }
               const locationData = {
                 city: isCurrentLocation
                   ? "Current Location"
                   : data.location.name,
-                actualCityName: isCurrentLocation ? data.location.name : null,
+                actualCityName,
                 fullData: data,
                 lastUpdated: Date.now(),
               };
+
+              console.log(locationData);
 
               if (isCurrentLocation) {
                 setCurrentLocation(locationData);
@@ -300,6 +333,11 @@ function App() {
               weather={weather}
               isCurrent={selectedLocation === currentLocation}
               clockTick={clockTick}
+              locationDisplayName={
+                selectedLocation === currentLocation
+                  ? selectedLocation?.actualCityName
+                  : undefined
+              }
             />
           </div>
         )}

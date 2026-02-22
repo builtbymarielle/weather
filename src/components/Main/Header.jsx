@@ -19,7 +19,12 @@ import {
   parseTimeWith12Hour,
 } from "../../utils/uiHelpers";
 
-export default function Header({ weather, isCurrent, clockTick }) {
+export default function Header({
+  weather,
+  isCurrent,
+  clockTick,
+  locationDisplayName,
+}) {
   // Getting the recommendation for the weather
   const [recommendation, setRecommendation] = useState("");
   // Getting the weather icon class depending on the current condition
@@ -33,7 +38,9 @@ export default function Header({ weather, isCurrent, clockTick }) {
   // Getting the background theme for the location. This is based on the hour of day
   const bgTheme = getBgTheme(hour24, styles);
 
-  const locationName = weather.location.name;
+  // For current location, prefer reverse-geocoded city name over API's neighborhood
+  const locationName =
+    locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
   const currentTemp = weather.current.temp_f;
   const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
