@@ -53,3 +53,35 @@ export function getRecommendations(condition, uv, highTemp, lowTemp) {
   if (tips.length === 0) tips.push("Have a great day! ");
   return tips;
 }
+
+/**
+ * Returns back the Location city Name from the lat and lons provided. Calls the openStreetMap API
+ * @param {lat} lat
+ * @param {lon} lon - UV index
+ * @returns {string} - A city name
+ */
+export async function reverseGeocodeToCity(lat, lon) {
+  const latNum = Number(lat);
+  const lonNum = Number(lon);
+  if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return null;
+  try {
+    const res = await fetch(
+      `/api-osm/reverse?lat=${latNum}&lon=${lonNum}&format=json&addressdetails=1`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const addr = data?.address;
+    if (!addr) return null;
+    return (
+      addr.city ||
+      addr.town ||
+      addr.village ||
+      addr.municipality ||
+      addr.county ||
+      null
+    );
+  } catch (error) {
+    console.error("Geocoding failed:", error);
+    return null;
+  }
+}

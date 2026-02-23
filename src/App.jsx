@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
-import { reverseGeocodeToCity } from "./services/ReverseGeocodeToCity";
+import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
@@ -200,8 +200,14 @@ function App() {
   const handleSelectLocation = (loc) => {
     if (!loc) return;
     setQuery(loc.city);
-    setLat("");
-    setLon("");
+    const isCurrent = isCurrentLocationLabel(loc?.city);
+    if (isCurrent && loc?.fullData?.location != null) {
+      setLat(loc.fullData.location.lat ?? "");
+      setLon(loc.fullData.location.lon ?? "");
+    } else {
+      setLat("");
+      setLon("");
+    }
     if (loc.fullData) {
       setSelectedLocation(loc);
       setWeather(loc.fullData);
@@ -244,14 +250,23 @@ function App() {
                 : undefined
             }
             cachedData={
-              selectedLocation?.city === query
-                ? selectedLocation?.fullData
-                : null
+              query === "Current Location"
+                ? (currentLocation?.fullData ??
+                  (selectedLocation?.city === query
+                    ? selectedLocation?.fullData
+                    : null))
+                : selectedLocation?.city === query
+                  ? selectedLocation?.fullData
+                  : null
             }
             cachedAt={
-              selectedLocation?.city === query
-                ? (selectedLocation?.lastUpdated ?? null)
-                : null
+              query === "Current Location"
+                ? (currentLocation?.lastUpdated ??
+                  selectedLocation?.lastUpdated ??
+                  null)
+                : selectedLocation?.city === query
+                  ? (selectedLocation?.lastUpdated ?? null)
+                  : null
             }
             onData={async (data) => {
               lastFetchedAtRef.current = Date.now();
@@ -265,7 +280,9 @@ function App() {
                 data?.location?.lat != null &&
                 data?.location?.lon != null
               ) {
-                const cityName = await reverseGeocodeToCity(lat, lon);
+                const coordLat = lat || data.location.lat;
+                const coordLon = lon || data.location.lon;
+                const cityName = await reverseGeocodeToCity(coordLat, coordLon);
                 if (cityName) actualCityName = cityName;
               }
               const locationData = {
