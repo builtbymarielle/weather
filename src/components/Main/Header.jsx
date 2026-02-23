@@ -50,6 +50,17 @@ export default function Header({
   // if the location is current use arrow icon, otherwise use location dot icon
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
+  // Setting Region name as State or Country
+  const country = weather?.location.country;
+  const region = weather?.location.region;
+  let place = "";
+
+  if (country === "United States of America") {
+    place = region;
+  } else {
+    place = country;
+  }
+
   // Passing the weather conditions and getting back recommendations based on that.
   useEffect(() => {
     const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
@@ -69,7 +80,7 @@ export default function Header({
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName} — {currentTemp}°F
+        {locationName}, {place} — {currentTemp}°F
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (

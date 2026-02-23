@@ -35,6 +35,17 @@ export default function LocationCard({
   // the current location card shows "Current Location" and in small text the city name
   const showBoth = isCurrent && actualCityName;
 
+  // Setting Region name as State or Country
+  const country = fullData?.location.country;
+  const region = fullData?.location.region;
+  let place = "";
+
+  if (country === "United States of America") {
+    place = region;
+  } else {
+    place = country;
+  }
+
   // If the location has no weather data, we show a placeholder card
   if (!fullData?.current) {
     return (
@@ -44,7 +55,9 @@ export default function LocationCard({
         <small>—</small>
         <div className="d-flex align-items-baseline">
           <FontAwesomeIcon icon={faLocationDot} className="me-1" />
-          <h5 className="m-0">{city}</h5>
+          <h5 className="m-0">
+            {city}, {place}
+          </h5>
         </div>
         <p className="m-0 small">No weather data</p>
       </div>
@@ -63,7 +76,11 @@ export default function LocationCard({
       <div className="d-flex align-items-baseline">
         <FontAwesomeIcon icon={locationIcon} className="me-1" />
         <h5 className="m-0">{city}</h5>{" "}
-        {showBoth && <small className="m-0 ps-1">{actualCityName}</small>}
+        {showBoth && (
+          <small className="m-0 ps-1">
+            {actualCityName}, {place}
+          </small>
+        )}
       </div>
       <h1>{fullData.current.temp_f}°F</h1>
       <div className="d-flex align-items-baseline justify-content-between">
