@@ -75,7 +75,10 @@ export default function LocationCard({
       </div>
       <div className="d-flex align-items-baseline">
         <FontAwesomeIcon icon={locationIcon} className="me-1" />
-        <h5 className="m-0">{city}</h5>{" "}
+        <h5 className="m-0">
+          {city}
+          {city !== "Current Location" ? `, ${place}` : ""}
+        </h5>{" "}
         {showBoth && (
           <small className="m-0 ps-1">
             {actualCityName}, {place}
