@@ -12,6 +12,7 @@ import {
   getBgTheme,
   getLiveTimeInZone,
   parseTimeWith12Hour,
+  isoAbbreviation,
 } from "../../utils/uiHelpers";
 
 export default function LocationCard({
@@ -38,13 +39,7 @@ export default function LocationCard({
   // Setting Region name as State or Country
   const country = fullData?.location.country;
   const region = fullData?.location.region;
-  let place = "";
-
-  if (country === "United States of America") {
-    place = region;
-  } else {
-    place = country;
-  }
+  let iso = isoAbbreviation(country, region);
 
   // If the location has no weather data, we show a placeholder card
   if (!fullData?.current) {
@@ -56,7 +51,7 @@ export default function LocationCard({
         <div className="d-flex align-items-baseline">
           <FontAwesomeIcon icon={faLocationDot} className="me-1" />
           <h5 className="m-0">
-            {city}, {place}
+            {city}, {iso}
           </h5>
         </div>
         <p className="m-0 small">No weather data</p>
@@ -73,15 +68,17 @@ export default function LocationCard({
       <div className="d-flex justify-content-between gap-2">
         {time12 && <small>{time12}</small>}
       </div>
-      <div className="d-flex align-items-baseline">
-        <FontAwesomeIcon icon={locationIcon} className="me-1" />
-        <h5 className="m-0">
-          {city}
-          {city !== "Current Location" ? `, ${place}` : ""}
-        </h5>{" "}
+      <div className="d-flex flex-column align-items-baseline">
+        <div className="d-flex align-items-baseline">
+          <FontAwesomeIcon icon={locationIcon} className="me-1" />
+          <h5 className="m-0">
+            {city}
+            {city !== "Current Location" ? `, ${iso}` : ""}
+          </h5>{" "}
+        </div>
         {showBoth && (
           <small className="m-0 ps-1">
-            {actualCityName}, {place}
+            {actualCityName}, {iso}
           </small>
         )}
       </div>

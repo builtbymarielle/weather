@@ -17,6 +17,7 @@ import {
   getBgTheme,
   getLiveTimeInZone,
   parseTimeWith12Hour,
+  isoAbbreviation,
 } from "../../utils/uiHelpers";
 
 export default function Header({
@@ -53,13 +54,7 @@ export default function Header({
   // Setting Region name as State or Country
   const country = weather?.location.country;
   const region = weather?.location.region;
-  let place = "";
-
-  if (country === "United States of America") {
-    place = region;
-  } else {
-    place = country;
-  }
+  let iso = isoAbbreviation(country, region);
 
   // Passing the weather conditions and getting back recommendations based on that.
   useEffect(() => {
@@ -80,7 +75,7 @@ export default function Header({
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName}, {place} — {currentTemp}°F
+        {locationName}, {iso} — {currentTemp}°F
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (
