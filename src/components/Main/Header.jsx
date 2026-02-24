@@ -17,9 +17,15 @@ import {
   getBgTheme,
   getLiveTimeInZone,
   parseTimeWith12Hour,
+  isoAbbreviation,
 } from "../../utils/uiHelpers";
 
-export default function Header({ weather, isCurrent, clockTick }) {
+export default function Header({
+  weather,
+  isCurrent,
+  clockTick,
+  locationDisplayName,
+}) {
   // Getting the recommendation for the weather
   const [recommendation, setRecommendation] = useState("");
   // Getting the weather icon class depending on the current condition
@@ -33,7 +39,9 @@ export default function Header({ weather, isCurrent, clockTick }) {
   // Getting the background theme for the location. This is based on the hour of day
   const bgTheme = getBgTheme(hour24, styles);
 
-  const locationName = weather.location.name;
+  // For current location, prefer reverse-geocoded city name over API's neighborhood
+  const locationName =
+    locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
   const currentTemp = weather.current.temp_f;
   const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
@@ -42,6 +50,11 @@ export default function Header({ weather, isCurrent, clockTick }) {
   const isDay = weather.current.is_day;
   // if the location is current use arrow icon, otherwise use location dot icon
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
+
+  // Setting Region name as State or Country
+  const country = weather?.location.country;
+  const region = weather?.location.region;
+  let iso = isoAbbreviation(country, region);
 
   // Passing the weather conditions and getting back recommendations based on that.
   useEffect(() => {
@@ -62,7 +75,7 @@ export default function Header({ weather, isCurrent, clockTick }) {
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName} — {currentTemp}°F
+        {locationName}, {iso} — {currentTemp}°F
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (

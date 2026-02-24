@@ -35,7 +35,11 @@ function LocationsSideBar({
         : "Use my location";
 
   // The button is disabled if the user is getting the location, fetching weather, or in 60s cooldown (to prevent spamming the button)
-  const isDisabled = locationButtonDisabled || gettingLocation || isCurrentLocationLoading;
+  const isDisabled =
+    locationButtonDisabled || gettingLocation || isCurrentLocationLoading;
+
+  const isCurrentLocationCardDisabled =
+    gettingLocation || isCurrentLocationLoading;
 
   return (
     <aside className={`sidebar ${styles.bgColor} p-3`}>
@@ -54,19 +58,19 @@ function LocationsSideBar({
           <span>Favorites</span>
         </li>
         {currentLocation && (
-         <li key={currentLocation} className="nav-item mb-2">
-           <button
-             className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
-             onClick={() => onSelectLocation(currentLocation)}
-             disabled={isDisabled}
-           >
-             <LocationCard
-               {...currentLocation}
-               selected={selectedLocation === currentLocation}
-               isCurrent={true}
-             />
-           </button>
-         </li>
+          <li key={currentLocation} className="nav-item mb-2">
+            <button
+              className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
+              onClick={() => onSelectLocation(currentLocation)}
+              disabled={isCurrentLocationCardDisabled}
+            >
+              <LocationCard
+                {...currentLocation}
+                selected={selectedLocation === currentLocation}
+                isCurrent={true}
+              />
+            </button>
+          </li>
         )}
         <li className="nav-item mb-2">
           <button

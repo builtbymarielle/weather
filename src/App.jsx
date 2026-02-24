@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
+import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
@@ -53,6 +54,8 @@ function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   // The search query
   const [query, setQuery] = useState("");
+  const [lat, setLat] = useState("");
+  const [lon, setLon] = useState("");
   const [currentLocationRefreshTrigger, setCurrentLocationRefreshTrigger] =
     useState(0);
   const [weather, setWeather] = useState(null);
@@ -150,7 +153,11 @@ function App() {
     setError(null);
     // Setting query to "Current Location", setting refreshTrigger, and loading is done
     navigator.geolocation.getCurrentPosition(
-      () => {
+      function (position) {
+        let formattedLat = position.coords.latitude;
+        let formattedLon = position.coords.longitude;
+        setLat(formattedLat);
+        setLon(formattedLon);
         setQuery("Current Location");
         setCurrentLocationRefreshTrigger((t) => t + 1);
         setGettingLocation(false);
@@ -193,6 +200,14 @@ function App() {
   const handleSelectLocation = (loc) => {
     if (!loc) return;
     setQuery(loc.city);
+    const isCurrent = isCurrentLocationLabel(loc?.city);
+    if (isCurrent && loc?.fullData?.location != null) {
+      setLat(loc.fullData.location.lat ?? "");
+      setLon(loc.fullData.location.lon ?? "");
+    } else {
+      setLat("");
+      setLon("");
+    }
     if (loc.fullData) {
       setSelectedLocation(loc);
       setWeather(loc.fullData);
@@ -218,6 +233,16 @@ function App() {
         {query && (
           <WeatherFetcher
             query={query}
+            currentLocationLat={
+              query === "Current Location"
+                ? lat || currentLocation?.fullData?.location?.lat
+                : undefined
+            }
+            currentLocationLon={
+              query === "Current Location"
+                ? lon || currentLocation?.fullData?.location?.lon
+                : undefined
+            }
             hourRefreshTrigger={hourRefreshTrigger}
             currentLocationRefreshTrigger={
               query === "Current Location"
@@ -225,23 +250,46 @@ function App() {
                 : undefined
             }
             cachedData={
-              selectedLocation?.city === query
-                ? selectedLocation?.fullData
-                : null
+              query === "Current Location"
+                ? (currentLocation?.fullData ??
+                  (selectedLocation?.city === query
+                    ? selectedLocation?.fullData
+                    : null))
+                : selectedLocation?.city === query
+                  ? selectedLocation?.fullData
+                  : null
             }
             cachedAt={
-              selectedLocation?.city === query
-                ? (selectedLocation?.lastUpdated ?? null)
-                : null
+              query === "Current Location"
+                ? (currentLocation?.lastUpdated ??
+                  selectedLocation?.lastUpdated ??
+                  null)
+                : selectedLocation?.city === query
+                  ? (selectedLocation?.lastUpdated ?? null)
+                  : null
             }
-            onData={(data) => {
+            onData={async (data) => {
               lastFetchedAtRef.current = Date.now();
               const isCurrentLocation = query === "Current Location";
+              // For current location, resolve lat/lon to city name (not neighborhood) via reverse geocoding
+              let actualCityName = isCurrentLocation
+                ? data.location.name
+                : null;
+              if (
+                isCurrentLocation &&
+                data?.location?.lat != null &&
+                data?.location?.lon != null
+              ) {
+                const coordLat = lat || data.location.lat;
+                const coordLon = lon || data.location.lon;
+                const cityName = await reverseGeocodeToCity(coordLat, coordLon);
+                if (cityName) actualCityName = cityName;
+              }
               const locationData = {
                 city: isCurrentLocation
                   ? "Current Location"
                   : data.location.name,
-                actualCityName: isCurrentLocation ? data.location.name : null,
+                actualCityName,
                 fullData: data,
                 lastUpdated: Date.now(),
               };
@@ -300,6 +348,11 @@ function App() {
               weather={weather}
               isCurrent={selectedLocation === currentLocation}
               clockTick={clockTick}
+              locationDisplayName={
+                selectedLocation === currentLocation
+                  ? selectedLocation?.actualCityName
+                  : undefined
+              }
             />
           </div>
         )}
