@@ -294,8 +294,6 @@ function App() {
                 lastUpdated: Date.now(),
               };
 
-              console.log(locationData);
-
               if (isCurrentLocation) {
                 setCurrentLocation(locationData);
                 setSelectedLocation(locationData);
