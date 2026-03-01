@@ -14,6 +14,7 @@ import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import Header from "./components/Main/Header";
 import "./styles/App.css";
+import ChartCardsContainer from "./components/Main/chartCardsContainer";
 
 // the max of recent location searches is 5
 const MAX_RECENTS = 5;
@@ -26,6 +27,9 @@ function isCurrentLocationLabel(city) {
 }
 
 function App() {
+  const tempUnit = "F"; // °F or °C
+  const measurementUnit = "standard"; // (standard or metric)
+
   // Go and get the current Location. If it is stored in the localStorage use that.
   // Else leave empty...user doesn't have a current location or hasn't triggered to get it.
   const [currentLocation, setCurrentLocation] = useState(() => {
@@ -227,6 +231,7 @@ function App() {
         locationButtonDisabled={locationButtonDisabled}
         gettingLocation={gettingLocation}
         isCurrentLocationLoading={query === "Current Location" && loading}
+        tempUnit={tempUnit}
       />
 
       <main className="w-100 d-flex">
@@ -346,6 +351,7 @@ function App() {
           <div className="container-fluid p-0 d-flex flex-column w-100">
             <Header
               weather={weather}
+              tempUnit={tempUnit}
               isCurrent={selectedLocation === currentLocation}
               clockTick={clockTick}
               locationDisplayName={
@@ -353,6 +359,11 @@ function App() {
                   ? selectedLocation?.actualCityName
                   : undefined
               }
+            />
+            <ChartCardsContainer
+              weather={weather}
+              tempUnit={tempUnit}
+              measurementUnit={measurementUnit}
             />
           </div>
         )}

@@ -24,6 +24,7 @@ function LocationsSideBar({
   locationButtonDisabled,
   gettingLocation,
   isCurrentLocationLoading,
+  tempUnit,
 }) {
   // Button label depending on if the user is getting the location, fetching weather, or in 60s cooldown
   const locationButtonLabel = gettingLocation
@@ -68,6 +69,7 @@ function LocationsSideBar({
                 {...currentLocation}
                 selected={selectedLocation === currentLocation}
                 isCurrent={true}
+                tempUnit={tempUnit}
               />
             </button>
           </li>
@@ -106,6 +108,7 @@ function LocationsSideBar({
                     selected={selectedLocation?.city === loc.city}
                     fullData={loc.fullData}
                     clockTick={clockTick}
+                    tempUnit={tempUnit}
                   />
                 </button>
               </li>

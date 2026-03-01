@@ -22,6 +22,7 @@ export default function LocationCard({
   isCurrent,
   fullData,
   clockTick,
+  tempUnit,
 }) {
   // Getting the timezone ID and local time for the location
   const tzId = fullData?.location?.tz_id;
@@ -40,6 +41,32 @@ export default function LocationCard({
   const country = fullData?.location.country;
   const region = fullData?.location.region;
   let iso = isoAbbreviation(country, region);
+
+  const mintemp_f = fullData.forecast?.forecastday?.[0]?.day?.mintemp_f;
+  const mintemp_c = fullData.forecast?.forecastday?.[0]?.day?.mintemp_c;
+  let mintempValue = 0;
+  let mintempLabel = "";
+
+  if (tempUnit === "F" && mintemp_f != null) {
+    mintempValue = mintemp_f;
+    mintempLabel = "°F";
+  } else if (tempUnit === "C" && mintemp_c != null) {
+    mintempValue = mintemp_c;
+    mintempLabel = "°C";
+  }
+
+  const maxtemp_f = fullData.forecast?.forecastday?.[0]?.day?.maxtemp_f;
+  const maxtemp_c = fullData.forecast?.forecastday?.[0]?.day?.maxtemp_c;
+  let maxtempValue = 0;
+  let maxtempLabel = "";
+
+  if (tempUnit === "F" && maxtemp_f != null) {
+    maxtempValue = maxtemp_f;
+    maxtempLabel = "°F";
+  } else if (tempUnit === "C" && maxtemp_c != null) {
+    maxtempValue = maxtemp_c;
+    maxtempLabel = "°C";
+  }
 
   // If the location has no weather data, we show a placeholder card
   if (!fullData?.current) {
@@ -86,8 +113,10 @@ export default function LocationCard({
       <div className="d-flex align-items-baseline justify-content-between">
         <p className="text-lg m-0">{fullData.current.condition?.text ?? "—"}</p>
         <p className="text-lg m-0 fw-bold">
-          L:{fullData.forecast?.forecastday?.[0]?.day?.mintemp_f ?? "—"}°F H:
-          {fullData.forecast?.forecastday?.[0]?.day?.maxtemp_f ?? "—"}°F
+          L:{mintempValue ?? "—"}
+          {mintempLabel} H:
+          {maxtempValue ?? "—"}
+          {maxtempLabel}
         </p>
       </div>
     </div>

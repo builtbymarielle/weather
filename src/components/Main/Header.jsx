@@ -22,6 +22,7 @@ import {
 
 export default function Header({
   weather,
+  tempUnit,
   isCurrent,
   clockTick,
   locationDisplayName,
@@ -43,9 +44,45 @@ export default function Header({
   const locationName =
     locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
-  const currentTemp = weather.current.temp_f;
-  const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
-  const lowTemp = weather.forecast.forecastday[0].day.mintemp_f;
+  const currentTempF = weather.current.temp_f;
+  const currentTempC = weather.current.temp_c;
+  let currentTempLabel = "";
+  let currentTempValue = 0;
+
+  if (tempUnit === "F" && currentTempF != null) {
+    currentTempValue = currentTempF;
+    currentTempLabel = "°F";
+  } else if (tempUnit === "C" && currentTempC != null) {
+    currentTempValue = currentTempC;
+    currentTempLabel = "°C";
+  }
+
+  const highTempF = weather.forecast.forecastday[0].day.maxtemp_f;
+  const highTempC = weather.forecast.forecastday[0].day.maxtemp_c;
+  let highTempLabel = "";
+  let highTempValue = 0;
+
+  if (tempUnit === "F" && highTempF != null) {
+    highTempValue = highTempF;
+    highTempLabel = "°F";
+  } else if (tempUnit === "C" && highTempC != null) {
+    highTempValue = highTempC;
+    highTempLabel = "°C";
+  }
+
+  const lowTempF = weather.forecast.forecastday[0].day.mintemp_f;
+  const lowTempC = weather.forecast.forecastday[0].day.mintemp_c;
+  let lowTempLabel = "";
+  let lowTempValue = 0;
+
+  if (tempUnit === "F" && lowTempF != null) {
+    lowTempValue = lowTempF;
+    lowTempLabel = "°F";
+  } else if (tempUnit === "C" && lowTempC != null) {
+    lowTempValue = lowTempC;
+    lowTempLabel = "°C";
+  }
+
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
   // if the location is current use arrow icon, otherwise use location dot icon
@@ -58,9 +95,9 @@ export default function Header({
 
   // Passing the weather conditions and getting back recommendations based on that.
   useEffect(() => {
-    const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
+    const tips = getRecommendations(currentCondition, uv, highTempF, lowTempF);
     setRecommendation(tips);
-  }, [currentCondition, highTemp, lowTemp, uv]);
+  }, [currentCondition, highTempF, lowTempF, uv]);
 
   // Passing the weather conditions and getting back weather icons
   useEffect(() => {
@@ -75,7 +112,8 @@ export default function Header({
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName}, {iso} — {currentTemp}°F
+        {locationName}, {iso} — {currentTempValue}
+        {currentTempLabel}
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (
@@ -83,7 +121,9 @@ export default function Header({
       )}
 
       <p>
-        High: {highTemp}°F | Low: {lowTemp}°F | Local Time: {time12}
+        High: {highTempValue}
+        {highTempLabel} | Low: {lowTempValue}
+        {lowTempLabel} | Local Time: {time12}
       </p>
       <p className={styles.recommendation}>{recommendation}</p>
     </header>
