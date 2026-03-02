@@ -31,7 +31,7 @@ export default function ChartCard({
           </h6>
           <p className="card-text">
             <strong className="display-6 fw-semibold">{cardInfo}</strong>
-            <small>{cardInfoSmall}</small>
+            <small> {cardInfoSmall}</small>
           </p>
         </div>
       </div>

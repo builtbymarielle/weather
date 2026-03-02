@@ -13,7 +13,7 @@ import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
-import { isoAbbreviation } from "../../utils/uiHelpers";
+import { isoAbbreviation, setTempUnit } from "../../utils/uiHelpers";
 
 export default function Header({
   weather,
@@ -33,42 +33,15 @@ export default function Header({
   const currentCondition = weather.current.condition.text;
   const currentTempF = weather.current.temp_f;
   const currentTempC = weather.current.temp_c;
-  let currentTempLabel = "";
-  let currentTempValue = 0;
-
-  if (tempUnit === "F" && currentTempF != null) {
-    currentTempValue = currentTempF;
-    currentTempLabel = "°F";
-  } else if (tempUnit === "C" && currentTempC != null) {
-    currentTempValue = currentTempC;
-    currentTempLabel = "°C";
-  }
+  let currentTempValue = setTempUnit(tempUnit, currentTempF, currentTempC);
 
   const highTempF = weather.forecast.forecastday[0].day.maxtemp_f;
   const highTempC = weather.forecast.forecastday[0].day.maxtemp_c;
-  let highTempLabel = "";
-  let highTempValue = 0;
-
-  if (tempUnit === "F" && highTempF != null) {
-    highTempValue = highTempF;
-    highTempLabel = "°F";
-  } else if (tempUnit === "C" && highTempC != null) {
-    highTempValue = highTempC;
-    highTempLabel = "°C";
-  }
+  let highTempValue = setTempUnit(tempUnit, highTempF, highTempC);
 
   const lowTempF = weather.forecast.forecastday[0].day.mintemp_f;
   const lowTempC = weather.forecast.forecastday[0].day.mintemp_c;
-  let lowTempLabel = "";
-  let lowTempValue = 0;
-
-  if (tempUnit === "F" && lowTempF != null) {
-    lowTempValue = lowTempF;
-    lowTempLabel = "°F";
-  } else if (tempUnit === "C" && lowTempC != null) {
-    lowTempValue = lowTempC;
-    lowTempLabel = "°C";
-  }
+  let lowTempValue = setTempUnit(tempUnit, lowTempF, lowTempC);
 
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
@@ -99,8 +72,7 @@ export default function Header({
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName}, {iso} — {currentTempValue}
-        {currentTempLabel}
+        {locationName}, {iso} — {currentTempValue}°{tempUnit}
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (
@@ -108,9 +80,8 @@ export default function Header({
       )}
 
       <p>
-        High: {highTempValue}
-        {highTempLabel} | Low: {lowTempValue}
-        {lowTempLabel} | Local Time: {time12}
+        High: {highTempValue}°{tempUnit} | Low: {lowTempValue}°{tempUnit} |
+        Local Time: {time12}
       </p>
       <p className={styles.recommendation}>{recommendation}</p>
     </header>

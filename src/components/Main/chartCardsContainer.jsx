@@ -17,6 +17,11 @@ import {
   faGauge,
   faCloud,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  setClockTime,
+  setTempUnit,
+  setMeasurementValue,
+} from "../../utils/uiHelpers";
 
 export default function ChartCardsContainer({
   weather,
@@ -25,54 +30,29 @@ export default function ChartCardsContainer({
 }) {
   //   Sunrise Logic
   const sunrise = weather?.forecast?.forecastday?.[0]?.astro?.sunrise;
-  let timeOnly = "";
-  let amPm = "";
+  let [sunriseTimeOnly, sunriseAmPM] = setClockTime(sunrise);
 
-  if (sunrise) {
-    const [time, modifier] = sunrise.split(" ");
-    timeOnly = time.replace(/^0/, "");
-    amPm = modifier;
-  }
   //   Sunset Logic
   const sunset = weather?.forecast?.forecastday?.[0]?.astro?.sunset;
-  let timeOnlySunset = "";
-  let amPmSunset = "";
-
-  if (sunset) {
-    const [time, modifier] = sunset.split(" ");
-    timeOnlySunset = time.replace(/^0/, "");
-    amPmSunset = modifier;
-  }
+  let [sunsetTimeOnly, sunsetAmPM] = setClockTime(sunset);
 
   //   UV Logic
   const uvrate = weather?.current.uv;
-  let uvIntensity = "";
-
-  if (uvrate >= 11) {
-    uvIntensity = "Extreme";
-  } else if (uvrate >= 8) {
-    uvIntensity = "Very High";
-  } else if (uvrate >= 6) {
-    uvIntensity = "High";
-  } else if (uvrate >= 3) {
-    uvIntensity = "Moderate";
-  } else {
-    uvIntensity = "Low";
-  }
+  const uvIntensity =
+    uvrate >= 11
+      ? "Extreme"
+      : uvrate >= 8
+        ? "Very High"
+        : uvrate >= 6
+          ? "High"
+          : uvrate >= 3
+            ? "Moderate"
+            : "Low";
 
   //   Feels like Logic (°F or °C)
-  const feelslike_f = weather?.current.feelslike_f;
-  const feelslike_c = weather?.current.feelslike_c;
-  let feelslikeValue = 0;
-  let feelslikeLabel = "";
-
-  if (tempUnit === "F" && feelslike_f != null) {
-    feelslikeValue = feelslike_f;
-    feelslikeLabel = "°F";
-  } else if (tempUnit === "C" && feelslike_c != null) {
-    feelslikeValue = feelslike_c;
-    feelslikeLabel = "°C";
-  }
+  const feelsLikeF = weather?.current.feelslike_f;
+  const feelsLikeC = weather?.current.feelslike_c;
+  let feelsLikeValue = setTempUnit(tempUnit, feelsLikeF, feelsLikeC);
 
   //   Humidity Logic
   const humidity = weather?.current.humidity;
@@ -80,68 +60,51 @@ export default function ChartCardsContainer({
   //   Wind Logic
   const wind_mph = weather?.current.wind_mph;
   const wind_kph = weather?.current.wind_kph;
-  let windValue = 0;
-  let windLabel = "";
-  if (measurementUnit === "standard" && wind_mph != null) {
-    windValue = wind_mph;
-    windLabel = "mph";
-  } else if (measurementUnit === "metric" && wind_kph != null) {
-    windValue = wind_kph;
-    windLabel = "kph";
-  }
+  const [windValue, windLabel] = setMeasurementValue(
+    measurementUnit,
+    wind_mph,
+    wind_kph,
+    "mph",
+    "kph",
+  );
 
   //   Visibility Logic
   const visibility_miles = weather?.current.vis_miles;
   const visibility_km = weather?.current.vis_km;
-  let visibilityValue = 0;
-  let visibilityLabel = "";
-  if (measurementUnit === "standard" && visibility_miles != null) {
-    visibilityValue = wind_mph;
-    visibilityLabel = "miles";
-  } else if (measurementUnit === "metric" && visibility_km != null) {
-    visibilityValue = visibility_km;
-    visibilityLabel = "km";
-  }
+  const [visibilityValue, visibilityLabel] = setMeasurementValue(
+    measurementUnit,
+    visibility_miles,
+    visibility_km,
+    "miles",
+    "km",
+  );
 
   //   Pressure Logic
   const pressure_in = weather?.current.pressure_in;
   const pressure_mb = weather?.current.pressure_mb;
-  let pressureValue = 0;
-  let pressureLabel = "";
-  if (measurementUnit === "standard" && pressure_in != null) {
-    pressureValue = pressure_in;
-    pressureLabel = "in";
-  } else if (measurementUnit === "metric" && pressure_mb != null) {
-    pressureValue = pressure_mb;
-    pressureLabel = "mb";
-  }
+  const [pressureValue, pressureLabel] = setMeasurementValue(
+    measurementUnit,
+    pressure_in,
+    pressure_mb,
+    "in",
+    "mb",
+  );
 
   // Percip Logic
   const precip_in = weather?.current.precip_in;
   const precip_mm = weather?.current.precip_mm;
-  let precipValue = 0;
-  let precipLabel = "";
-  if (measurementUnit === "standard" && precip_in != null) {
-    precipValue = precip_in;
-    precipLabel = "in";
-  } else if (measurementUnit === "metric" && precip_mm != null) {
-    precipValue = precip_mm;
-    precipLabel = "mm";
-  }
+  const [precipValue, precipLabel] = setMeasurementValue(
+    measurementUnit,
+    precip_in,
+    precip_mm,
+    "in",
+    "mm",
+  );
 
   // Dew Point Logic
-  const dewpoint_f = weather?.current.dewpoint_f;
-  const dewpoint_c = weather?.current.dewpoint_c;
-  let dewpointValue = 0;
-  let dewpointLabel = "";
-
-  if (tempUnit === "F" && dewpoint_f != null) {
-    dewpointValue = dewpoint_f;
-    dewpointLabel = "°F";
-  } else if (tempUnit === "C" && dewpoint_c != null) {
-    dewpointValue = dewpoint_c;
-    dewpointLabel = "°C";
-  }
+  const dewPoinF = weather?.current.dewpoint_f;
+  const dewPointC = weather?.current.dewpoint_c;
+  let dewPointValue = setTempUnit(tempUnit, dewPoinF, dewPointC);
 
   return (
     <div className="container">
@@ -149,14 +112,14 @@ export default function ChartCardsContainer({
         <ChartCard
           cardTitle={"Sunrise"}
           cardIcon={"wi-sunrise"}
-          cardInfo={timeOnly}
-          cardInfoSmall={amPm}
+          cardInfo={sunriseTimeOnly}
+          cardInfoSmall={sunriseAmPM}
         />
         <ChartCard
           cardTitle={"Sunset"}
           cardIcon={"wi-sunset"}
-          cardInfo={timeOnlySunset}
-          cardInfoSmall={amPmSunset}
+          cardInfo={sunsetTimeOnly}
+          cardInfoSmall={sunsetAmPM}
         />
         <ChartCard
           cardTitle={"UV Index"}
@@ -167,8 +130,8 @@ export default function ChartCardsContainer({
         <ChartCard
           cardTitle={"Feels Like"}
           cardIcon={faTemperatureHalf}
-          cardInfo={feelslikeValue}
-          cardInfoSmall={feelslikeLabel}
+          cardInfo={feelsLikeValue}
+          cardInfoSmall={"°" + tempUnit}
         />
         <ChartCard
           cardTitle={"Humidity"}
@@ -203,8 +166,8 @@ export default function ChartCardsContainer({
         <ChartCard
           cardTitle={"Dew Point"}
           cardIcon={faDroplet}
-          cardInfo={dewpointValue}
-          cardInfoSmall={dewpointLabel}
+          cardInfo={dewPointValue}
+          cardInfoSmall={"°" + tempUnit}
         />
       </div>
     </div>
