@@ -11,7 +11,7 @@ import {
   faClockRotateLeft,
   faLocationCrosshairs,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./LocationsSideBar.module.css";
+import styles from "./Sidebar.module.css";
 
 function LocationsSideBar({
   currentLocation,

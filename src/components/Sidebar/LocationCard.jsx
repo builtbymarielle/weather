@@ -7,7 +7,7 @@ import {
   faLocationDot,
   faLocationArrow,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./LocationCard.module.css";
+import styles from "./Sidebar.module.css";
 import {
   getBgTheme,
   getLiveTimeInZone,

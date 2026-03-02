@@ -3,7 +3,7 @@
  */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import styles from "./SearchBar.module.css";
+import styles from "./Sidebar.module.css";
 
 export default function SearchBar({ onSearch }) {
   // When the user submits the form, we get the location from the form data and call the onSearch function

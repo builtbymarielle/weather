@@ -6,10 +6,16 @@
  * UV index, temperature, wind, humidity, pressure, precipitation, dew point).
  *
  */
-import ChartCard from "./chartCard";
+import ChartCard from "./ChartCard";
 import {
-  faIceCream,
   faTemperatureHalf,
+  faEye,
+  faWind,
+  faDroplet,
+  faCloudRain,
+  faSun,
+  faGauge,
+  faCloud,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function ChartCardsContainer({
@@ -143,70 +149,60 @@ export default function ChartCardsContainer({
         <ChartCard
           cardTitle={"Sunrise"}
           cardIcon={"wi-sunrise"}
-          iconColor="yellow"
           cardInfo={timeOnly}
           cardInfoSmall={amPm}
         />
         <ChartCard
           cardTitle={"Sunset"}
           cardIcon={"wi-sunset"}
-          iconColor="orange"
           cardInfo={timeOnlySunset}
           cardInfoSmall={amPmSunset}
         />
         <ChartCard
           cardTitle={"UV Index"}
-          cardIcon={faIceCream}
-          iconColor="pink"
+          cardIcon={faSun}
           cardInfo={uvrate}
           cardInfoSmall={uvIntensity}
         />
         <ChartCard
           cardTitle={"Feels Like"}
           cardIcon={faTemperatureHalf}
-          iconColor="purple"
           cardInfo={feelslikeValue}
           cardInfoSmall={feelslikeLabel}
         />
         <ChartCard
           cardTitle={"Humidity"}
-          cardIcon={"wi-humidity"}
-          iconColor="blue"
+          cardIcon={faCloud}
           cardInfo={humidity}
           cardInfoSmall="%"
         />
         <ChartCard
           cardTitle={"Wind"}
-          cardIcon={"wi-strong-wind"}
-          iconColor="grey"
+          cardIcon={faWind}
           cardInfo={windValue}
           cardInfoSmall={windLabel}
         />
         <ChartCard
           cardTitle={"Visibility"}
-          iconColor="indigo"
-          cardIcon={"wi-small-craft-advisory"}
+          cardIcon={faEye}
           cardInfo={visibilityValue}
           cardInfoSmall={visibilityLabel}
         />
         <ChartCard
           cardTitle={"Pressure"}
-          cardIcon={"wi-barometer"}
-          iconColor="red"
+          cardIcon={faGauge}
           cardInfo={pressureValue}
           cardInfoSmall={pressureLabel}
         />
         <ChartCard
           cardTitle={"Percipitation"}
-          cardIcon={"wi-umbrella"}
-          iconColor="lightBlue"
+          cardIcon={faCloudRain}
           cardInfo={precipValue}
           cardInfoSmall={precipLabel}
         />
         <ChartCard
           cardTitle={"Dew Point"}
-          cardIcon={"wi-raindrops"}
-          iconColor="green"
+          cardIcon={faDroplet}
           cardInfo={dewpointValue}
           cardInfoSmall={dewpointLabel}
         />

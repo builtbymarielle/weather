@@ -12,9 +12,14 @@ import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
-import Header from "./components/Main/Header";
 import "./styles/App.css";
-import ChartCardsContainer from "./components/Main/chartCardsContainer";
+import {
+  getBgTheme,
+  getLiveTimeInZone,
+  parseTimeWith12Hour,
+} from "./utils/uiHelpers";
+import styles from "../src/components/Main/Main.module.css";
+import MainContent from "./components/Main/MainContent";
 
 // the max of recent location searches is 5
 const MAX_RECENTS = 5;
@@ -218,8 +223,14 @@ function App() {
     }
   };
 
+  // Get the local time zone, get time, and set background theme
+  const tzId = weather?.location?.tz_id;
+  const fallback = parseTimeWith12Hour(weather?.location?.localtime);
+  const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
+  const bgTheme = getBgTheme(hour24, styles);
+
   return (
-    <div className="d-flex vh-100">
+    <div className={`${bgTheme} d-flex vh-100`}>
       <LocationsSideBar
         currentLocation={currentLocation}
         recentLocations={recentLocations}
@@ -348,24 +359,19 @@ function App() {
         {error && <p className="text-center text-red-500">{error}</p>}
 
         {weather && (
-          <div className="container-fluid p-0 d-flex flex-column w-100">
-            <Header
-              weather={weather}
-              tempUnit={tempUnit}
-              isCurrent={selectedLocation === currentLocation}
-              clockTick={clockTick}
-              locationDisplayName={
-                selectedLocation === currentLocation
-                  ? selectedLocation?.actualCityName
-                  : undefined
-              }
-            />
-            <ChartCardsContainer
-              weather={weather}
-              tempUnit={tempUnit}
-              measurementUnit={measurementUnit}
-            />
-          </div>
+          <MainContent
+            weather={weather}
+            tempUnit={tempUnit}
+            measurementUnit={measurementUnit}
+            isCurrent={selectedLocation === currentLocation}
+            clockTick={clockTick}
+            locationDisplayName={
+              selectedLocation === currentLocation
+                ? selectedLocation?.actualCityName
+                : undefined
+            }
+            time12={time12}
+          />
         )}
       </main>
     </div>

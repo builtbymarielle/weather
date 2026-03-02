@@ -8,37 +8,24 @@ import {
   faLocationDot,
   faLocationArrow,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./Header.module.css";
+import styles from "./Main.module.css";
 import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
-import {
-  getBgTheme,
-  getLiveTimeInZone,
-  parseTimeWith12Hour,
-  isoAbbreviation,
-} from "../../utils/uiHelpers";
+import { isoAbbreviation } from "../../utils/uiHelpers";
 
 export default function Header({
   weather,
   tempUnit,
   isCurrent,
-  clockTick,
   locationDisplayName,
+  time12,
 }) {
   // Getting the recommendation for the weather
   const [recommendation, setRecommendation] = useState("");
   // Getting the weather icon class depending on the current condition
   const [weatherIconClass, setWeatherIconClass] = useState("");
-
-  // Getting the timezone ID and local time for the location
-  const tzId = weather?.location?.tz_id;
-  // If the timezone ID is not found, we use the fallback time
-  const fallback = parseTimeWith12Hour(weather?.location?.localtime);
-  const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
-  // Getting the background theme for the location. This is based on the hour of day
-  const bgTheme = getBgTheme(hour24, styles);
 
   // For current location, prefer reverse-geocoded city name over API's neighborhood
   const locationName =
@@ -108,7 +95,7 @@ export default function Header({
   }, [currentCondition, isDay]);
 
   return (
-    <header className={`${bgTheme} p-3 text-white w-100`}>
+    <header className={`p-3 text-white w-100`}>
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
