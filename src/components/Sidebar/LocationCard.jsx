@@ -7,12 +7,13 @@ import {
   faLocationDot,
   faLocationArrow,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./LocationCard.module.css";
+import styles from "./Sidebar.module.css";
 import {
   getBgTheme,
   getLiveTimeInZone,
   parseTimeWith12Hour,
   isoAbbreviation,
+  setTempUnit,
 } from "../../utils/uiHelpers";
 
 export default function LocationCard({
@@ -21,7 +22,7 @@ export default function LocationCard({
   selected,
   isCurrent,
   fullData,
-  clockTick,
+  tempUnit,
 }) {
   // Getting the timezone ID and local time for the location
   const tzId = fullData?.location?.tz_id;
@@ -40,6 +41,14 @@ export default function LocationCard({
   const country = fullData?.location.country;
   const region = fullData?.location.region;
   let iso = isoAbbreviation(country, region);
+
+  const lowTempF = fullData.forecast?.forecastday?.[0]?.day?.mintemp_f;
+  const lowTempC = fullData.forecast?.forecastday?.[0]?.day?.mintemp_c;
+  let lowTempValue = setTempUnit(tempUnit, lowTempF, lowTempC);
+
+  const highTempF = fullData.forecast?.forecastday?.[0]?.day?.maxtemp_f;
+  const highTempC = fullData.forecast?.forecastday?.[0]?.day?.maxtemp_c;
+  let highTempValue = setTempUnit(tempUnit, highTempF, highTempC);
 
   // If the location has no weather data, we show a placeholder card
   if (!fullData?.current) {
@@ -86,8 +95,8 @@ export default function LocationCard({
       <div className="d-flex align-items-baseline justify-content-between">
         <p className="text-lg m-0">{fullData.current.condition?.text ?? "—"}</p>
         <p className="text-lg m-0 fw-bold">
-          L:{fullData.forecast?.forecastday?.[0]?.day?.mintemp_f ?? "—"}°F H:
-          {fullData.forecast?.forecastday?.[0]?.day?.maxtemp_f ?? "—"}°F
+          L:{lowTempValue ?? "—"}°{tempUnit} H:
+          {highTempValue ?? "—"}°{tempUnit}
         </p>
       </div>
     </div>

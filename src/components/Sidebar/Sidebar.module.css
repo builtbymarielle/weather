@@ -35,7 +35,7 @@
 }
 
 .locCard > * {
-  position: relative; /* content above overlay */
+  position: relative;
   z-index: 2;
 }
 
@@ -85,4 +85,61 @@
 
 .customLocationButton:disabled {
   opacity: 0.5;
+}
+
+.bgColor {
+  background: var(--bg-ourdark);
+}
+
+.customBrand {
+  border-bottom: 1px solid var(--text-white-trans);
+}
+.customBrand span {
+  color: var(--text-white);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.customBrand svg {
+  color: var(--text-white);
+  font-size: 18px;
+}
+
+.customTitle span {
+  color: var(--text-white-trans);
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.customTitle svg {
+  color: var(--text-white-trans);
+  font-size: 12px;
+}
+
+.customLocationButton {
+  font-size: 12px;
+}
+.customLocationButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bgInputDark {
+  background: var(--bg-dark2);
+}
+
+#searchInput {
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 12px;
+}
+
+#searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+#searchInput:focus {
+  outline: none;
 }
