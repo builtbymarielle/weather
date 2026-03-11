@@ -141,3 +141,63 @@ export function isoAbbreviation(country, region) {
   }
   return countryCode;
 }
+
+/**
+ * Setting up the temp unit, used in header, locationCards, and chartCharts
+ * @param {tempUnit} F or C
+ * @param {tempF} F
+ * @param {tempC} C
+ * @returns {tempValue} temp in F or C
+ */
+export function setTempUnit(tempUnit, tempF, tempC) {
+  let tempValue = "";
+  if (tempUnit === "F" && tempF != null) {
+    tempValue = tempF;
+  } else if (tempUnit === "C" && tempC != null) {
+    tempValue = tempC;
+  }
+  return tempValue;
+}
+
+/**
+ * Setting up the time. Split number time and amPM. // 07:24 AM
+ * @param {time} // 07:24 AM
+ * @returns {timeOnly, amPm} // 7:24, AM
+ */
+export function setClockTime(time) {
+  let timeOnly = "";
+  let amPm = "";
+  if (time) {
+    const [timePart, modifier] = time.split(" ");
+    timeOnly = timePart.replace(/^0/, "");
+    amPm = modifier;
+  }
+  return [timeOnly, amPm];
+}
+
+/**
+ * Setting up the measurement unit, used in chartCharts
+ * @param {measurementUnit} standard or metric
+ * @param {standardValue} standard value
+ * @param {metricValue} metric value
+ * @param {standardLabel} standard label (miles, mph, in)
+ * @param {metricLabel} metric label (kms, kph, mm)
+ * @returns {value, label}
+ */
+export function setMeasurementValue(
+  measurementUnit,
+  standardValue,
+  metricValue,
+  standardLabel,
+  metricLabel,
+) {
+  if (measurementUnit === "standard" && standardValue != null) {
+    return [standardValue, standardLabel];
+  }
+
+  if (measurementUnit === "metric" && metricValue != null) {
+    return [metricValue, metricLabel];
+  }
+
+  return [0, ""];
+}

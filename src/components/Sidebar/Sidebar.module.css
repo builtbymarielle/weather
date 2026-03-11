@@ -1,0 +1,199 @@
+.locCard {
+  text-align: start;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+  cursor: pointer;
+}
+
+.locCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 px 20px rgba(0, 0, 0, 0.3);
+}
+
+.overlay {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1 !important;
+  transition: opacity 0.3s ease;
+}
+
+.selected {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.locCard > * {
+  position: relative;
+  z-index: 2;
+}
+
+.locCard.bgSunrise {
+  background: var(--bg-sunrise);
+}
+
+.locCard.bgDay {
+  background: var(--bg-daytime);
+}
+
+.locCard.bgSunset {
+  background: var(--bg-sunset);
+}
+
+.locCard.bgNight {
+  background: var(--bg-nighttime);
+}
+
+.locCard small {
+  font-size: 12px;
+  font-weight: 200;
+}
+
+.locCard svg {
+  font-size: 12px;
+}
+
+.locCard h5 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.locCard h1 {
+  font-size: 40px;
+  font-weight: 600;
+}
+
+.locCard p {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.customLocationButton {
+  font-size: 12px;
+}
+
+.customLocationButton:disabled {
+  opacity: 0.5;
+}
+
+.bgColor {
+  background: var(--bg-ourdark);
+}
+
+.customBrand {
+  border-bottom: 1px solid var(--text-white-trans);
+}
+.customBrand span {
+  color: var(--text-white);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.customBrand svg {
+  color: var(--text-white);
+  font-size: 18px;
+}
+
+.customTitle span {
+  color: var(--text-white-trans);
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.customTitle svg {
+  color: var(--text-white-trans);
+  font-size: 12px;
+}
+
+.customLocationButton {
+  font-size: 12px;
+}
+.customLocationButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bgInputDark {
+  background: var(--bg-dark2);
+}
+
+#searchInput {
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 12px;
+}
+
+#searchInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+#searchInput:focus {
+  outline: none;
+}
+.settingsBtn {
+  font-size: 11px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--text-placeholder);
+  padding: 0;
+  transition: 0.3s ease;
+}
+
+.settingsBtn svg {
+  font-size: 10px;
+  padding: 5px 3px;
+  color: var(--text-placeholder);
+}
+
+.settingsBtn:hover {
+  border: 1px solid var(--text-white);
+}
+
+.settingsBtn:hover svg {
+  color: var(--text-white);
+}
+
+.customDropdownItem {
+  background-color: transparent;
+  color: black;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s ease;
+  justify-content: flex-start;
+  border: none;
+  width: 100%;
+}
+
+.customDropdownItem span,
+.customDropdownItem svg {
+  color: black;
+  font-size: 12px;
+}
+
+.customDropdownItem:hover {
+  background-color: rgba(79, 172, 254, 0.18);
+}
+
+.customDropdownItem.active {
+  font-weight: bolder;
+  background-color: rgba(79, 172, 254, 0.1);
+}
+
+.customDropdownItem.active svg {
+  color: #4facfe;
+}

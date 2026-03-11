@@ -8,44 +8,41 @@ import {
   faLocationDot,
   faLocationArrow,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./Header.module.css";
+import styles from "./Main.module.css";
 import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
-import {
-  getBgTheme,
-  getLiveTimeInZone,
-  parseTimeWith12Hour,
-  isoAbbreviation,
-} from "../../utils/uiHelpers";
+import { isoAbbreviation, setTempUnit } from "../../utils/uiHelpers";
 
 export default function Header({
   weather,
+  tempUnit,
   isCurrent,
-  clockTick,
   locationDisplayName,
+  time12,
 }) {
   // Getting the recommendation for the weather
   const [recommendation, setRecommendation] = useState("");
   // Getting the weather icon class depending on the current condition
   const [weatherIconClass, setWeatherIconClass] = useState("");
 
-  // Getting the timezone ID and local time for the location
-  const tzId = weather?.location?.tz_id;
-  // If the timezone ID is not found, we use the fallback time
-  const fallback = parseTimeWith12Hour(weather?.location?.localtime);
-  const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
-  // Getting the background theme for the location. This is based on the hour of day
-  const bgTheme = getBgTheme(hour24, styles);
-
   // For current location, prefer reverse-geocoded city name over API's neighborhood
   const locationName =
     locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
-  const currentTemp = weather.current.temp_f;
-  const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
-  const lowTemp = weather.forecast.forecastday[0].day.mintemp_f;
+  const currentTempF = weather.current.temp_f;
+  const currentTempC = weather.current.temp_c;
+  let currentTempValue = setTempUnit(tempUnit, currentTempF, currentTempC);
+
+  const highTempF = weather.forecast.forecastday[0].day.maxtemp_f;
+  const highTempC = weather.forecast.forecastday[0].day.maxtemp_c;
+  let highTempValue = setTempUnit(tempUnit, highTempF, highTempC);
+
+  const lowTempF = weather.forecast.forecastday[0].day.mintemp_f;
+  const lowTempC = weather.forecast.forecastday[0].day.mintemp_c;
+  let lowTempValue = setTempUnit(tempUnit, lowTempF, lowTempC);
+
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
   // if the location is current use arrow icon, otherwise use location dot icon
@@ -58,9 +55,9 @@ export default function Header({
 
   // Passing the weather conditions and getting back recommendations based on that.
   useEffect(() => {
-    const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
+    const tips = getRecommendations(currentCondition, uv, highTempF, lowTempF);
     setRecommendation(tips);
-  }, [currentCondition, highTemp, lowTemp, uv]);
+  }, [currentCondition, highTempF, lowTempF, uv]);
 
   // Passing the weather conditions and getting back weather icons
   useEffect(() => {
@@ -71,11 +68,11 @@ export default function Header({
   }, [currentCondition, isDay]);
 
   return (
-    <header className={`${bgTheme} p-3 text-white w-100`}>
+    <header className={`p-3 text-white w-100`}>
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName}, {iso} — {currentTemp}°F
+        {locationName}, {iso} — {currentTempValue}°{tempUnit}
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (
@@ -83,7 +80,8 @@ export default function Header({
       )}
 
       <p>
-        High: {highTemp}°F | Low: {lowTemp}°F | Local Time: {time12}
+        High: {highTempValue}°{tempUnit} | Low: {lowTempValue}°{tempUnit} |
+        Local Time: {time12}
       </p>
       <p className={styles.recommendation}>{recommendation}</p>
     </header>
