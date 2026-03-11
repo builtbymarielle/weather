@@ -32,8 +32,15 @@ function isCurrentLocationLabel(city) {
 }
 
 function App() {
-  const tempUnit = "F"; // °F or °C
-  const measurementUnit = "standard"; // (standard or metric)
+  const [tempUnit, setTempUnit] = useState("F"); // °F or °C
+  const handleChangeTempUnit = (unit) => {
+    setTempUnit(unit);
+  };
+
+  const [measurementUnit, setMeasurementUnit] = useState("standard"); // (standard or metric)
+  const handleChangeMeasurementUnit = (unit) => {
+    setMeasurementUnit(unit);
+  };
 
   // Go and get the current Location. If it is stored in the localStorage use that.
   // Else leave empty...user doesn't have a current location or hasn't triggered to get it.
@@ -243,6 +250,9 @@ function App() {
         gettingLocation={gettingLocation}
         isCurrentLocationLoading={query === "Current Location" && loading}
         tempUnit={tempUnit}
+        onChangeTempUnit={handleChangeTempUnit}
+        measurementUnit={measurementUnit}
+        onChangeMeasurementUnit={handleChangeMeasurementUnit}
       />
 
       <main className="w-100 d-flex">

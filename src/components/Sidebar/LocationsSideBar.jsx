@@ -10,6 +10,8 @@ import {
   faStar,
   faClockRotateLeft,
   faLocationCrosshairs,
+  faEllipsis,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Sidebar.module.css";
 
@@ -25,6 +27,9 @@ function LocationsSideBar({
   gettingLocation,
   isCurrentLocationLoading,
   tempUnit,
+  onChangeTempUnit,
+  measurementUnit,
+  onChangeMeasurementUnit,
 }) {
   // Button label depending on if the user is getting the location, fetching weather, or in 60s cooldown
   const locationButtonLabel = gettingLocation
@@ -45,9 +50,91 @@ function LocationsSideBar({
   return (
     <aside className={`sidebar ${styles.bgColor} p-3`}>
       <div className="sidebar-header pb-2">
-        <div className={`${styles.customBrand} sidebar-brand pb-2 mb-2`}>
-          <FontAwesomeIcon icon={faLocationDot} className="me-1" />
-          <span>Locations</span>
+        <div
+          className={`${styles.customBrand} sidebar-brand pb-2 mb-2 justify-content-between align-items-center d-flex`}
+        >
+          <div>
+            <FontAwesomeIcon icon={faLocationDot} className="me-1" />
+            <span>Locations</span>
+          </div>
+          <div className="dropdown" data-bs-auto-close="outside">
+            <button
+              className={`rounded-circle ${styles.settingsBtn}`}
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <FontAwesomeIcon icon={faEllipsis} />
+            </button>
+
+            <ul className="dropdown-menu dropdown-menu-end">
+              <li>
+                <h6 className="dropdown-header">Temperature Units</h6>
+              </li>
+              <li>
+                <button
+                  className={`${styles.customDropdownItem} ${tempUnit === "C" ? styles.active : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChangeTempUnit("C");
+                  }}
+                >
+                  {tempUnit === "C" && <FontAwesomeIcon icon={faCheck} />}
+                  <span className="ms-2">°C (Celsius)</span>
+                </button>
+              </li>
+
+              <li>
+                <button
+                  className={`${styles.customDropdownItem} ${tempUnit === "F" ? styles.active : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChangeTempUnit("F");
+                  }}
+                >
+                  {tempUnit === "F" && <FontAwesomeIcon icon={faCheck} />}
+                  <span className="ms-2">°F (Fahrenheit)</span>
+                </button>
+              </li>
+
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+
+              <li>
+                <h6 className="dropdown-header">Measurement Units</h6>
+              </li>
+              <li>
+                <button
+                  className={`${styles.customDropdownItem} ${measurementUnit === "standard" ? styles.active : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChangeMeasurementUnit("standard");
+                  }}
+                >
+                  {measurementUnit === "standard" && (
+                    <FontAwesomeIcon icon={faCheck} />
+                  )}
+                  <span className="ms-2">Standard</span>
+                </button>
+              </li>
+
+              <li>
+                <button
+                  className={`${styles.customDropdownItem} ${measurementUnit === "metric" ? styles.active : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChangeMeasurementUnit("metric");
+                  }}
+                >
+                  {measurementUnit === "metric" && (
+                    <FontAwesomeIcon icon={faCheck} />
+                  )}
+                  <span className="ms-2">Metric</span>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
         <SearchBar onSearch={(query) => onSearch(query)} />
       </div>
