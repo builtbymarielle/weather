@@ -255,7 +255,7 @@ function App() {
         onChangeMeasurementUnit={handleChangeMeasurementUnit}
       />
 
-      <main className="w-100 d-flex">
+      <main className="w-100 d-flex overflow-hidden">
         {query && (
           <WeatherFetcher
             query={query}

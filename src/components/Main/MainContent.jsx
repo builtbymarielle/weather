@@ -1,5 +1,6 @@
 import Header from "./Header";
 import ChartCardsContainer from "./ChartCardsContainer";
+import HourlyForecastContainer from "./HourlyForecastContainer";
 
 export default function MainContent({
   weather,
@@ -11,7 +12,7 @@ export default function MainContent({
   time12,
 }) {
   return (
-    <div className="container-fluid p-0 d-flex flex-column w-100">
+    <div className="container-fluid p-0 d-flex flex-column w-100 overflow-hidden">
       <Header
         weather={weather}
         tempUnit={tempUnit}
@@ -20,6 +21,7 @@ export default function MainContent({
         locationDisplayName={locationDisplayName}
         time12={time12}
       />
+      <HourlyForecastContainer weather={weather} tempUnit={tempUnit} />
       <ChartCardsContainer
         weather={weather}
         tempUnit={tempUnit}
