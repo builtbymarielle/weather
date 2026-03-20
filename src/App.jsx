@@ -12,8 +12,14 @@ import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
-import Header from "./components/Main/Header";
 import "./styles/App.css";
+import {
+  getBgTheme,
+  getLiveTimeInZone,
+  parseTimeWith12Hour,
+} from "./utils/uiHelpers";
+import styles from "../src/components/Main/Main.module.css";
+import MainContent from "./components/Main/MainContent";
 
 // the max of recent location searches is 5
 const MAX_RECENTS = 5;
@@ -26,6 +32,16 @@ function isCurrentLocationLabel(city) {
 }
 
 function App() {
+  const [tempUnit, setTempUnit] = useState("F"); // °F or °C
+  const handleChangeTempUnit = (unit) => {
+    setTempUnit(unit);
+  };
+
+  const [measurementUnit, setMeasurementUnit] = useState("standard"); // (standard or metric)
+  const handleChangeMeasurementUnit = (unit) => {
+    setMeasurementUnit(unit);
+  };
+
   // Go and get the current Location. If it is stored in the localStorage use that.
   // Else leave empty...user doesn't have a current location or hasn't triggered to get it.
   const [currentLocation, setCurrentLocation] = useState(() => {
@@ -214,8 +230,14 @@ function App() {
     }
   };
 
+  // Get the local time zone, get time, and set background theme
+  const tzId = weather?.location?.tz_id;
+  const fallback = parseTimeWith12Hour(weather?.location?.localtime);
+  const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
+  const bgTheme = getBgTheme(hour24, styles);
+
   return (
-    <div className="d-flex vh-100">
+    <div className={`${bgTheme} d-flex vh-100`}>
       <LocationsSideBar
         currentLocation={currentLocation}
         recentLocations={recentLocations}
@@ -227,9 +249,13 @@ function App() {
         locationButtonDisabled={locationButtonDisabled}
         gettingLocation={gettingLocation}
         isCurrentLocationLoading={query === "Current Location" && loading}
+        tempUnit={tempUnit}
+        onChangeTempUnit={handleChangeTempUnit}
+        measurementUnit={measurementUnit}
+        onChangeMeasurementUnit={handleChangeMeasurementUnit}
       />
 
-      <main className="w-100 d-flex">
+      <main className="w-100 d-flex overflow-hidden">
         {query && (
           <WeatherFetcher
             query={query}
@@ -343,18 +369,19 @@ function App() {
         {error && <p className="text-center text-red-500">{error}</p>}
 
         {weather && (
-          <div className="container-fluid p-0 d-flex flex-column w-100">
-            <Header
-              weather={weather}
-              isCurrent={selectedLocation === currentLocation}
-              clockTick={clockTick}
-              locationDisplayName={
-                selectedLocation === currentLocation
-                  ? selectedLocation?.actualCityName
-                  : undefined
-              }
-            />
-          </div>
+          <MainContent
+            weather={weather}
+            tempUnit={tempUnit}
+            measurementUnit={measurementUnit}
+            isCurrent={selectedLocation === currentLocation}
+            clockTick={clockTick}
+            locationDisplayName={
+              selectedLocation === currentLocation
+                ? selectedLocation?.actualCityName
+                : undefined
+            }
+            time12={time12}
+          />
         )}
       </main>
     </div>
