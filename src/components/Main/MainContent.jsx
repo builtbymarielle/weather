@@ -1,6 +1,7 @@
 import Header from "./Header";
 import ChartCardsContainer from "./ChartCardsContainer";
 import HourlyForecastContainer from "./HourlyForecastContainer";
+import WeeklyForecastContainer from "./WeeklyForecastContainer";
 
 export default function MainContent({
   weather,
@@ -22,6 +23,8 @@ export default function MainContent({
         time12={time12}
       />
       <HourlyForecastContainer weather={weather} tempUnit={tempUnit} />
+      <WeeklyForecastContainer weather={weather} tempUnit={tempUnit} />
+
       <ChartCardsContainer
         weather={weather}
         tempUnit={tempUnit}

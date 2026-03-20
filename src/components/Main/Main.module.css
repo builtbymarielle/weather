@@ -31,3 +31,7 @@
 .cardOutlineCustom {
   border: 2px solid rgba(255, 255, 255, 0.3) !important;
 }
+
+.customWhiteText {
+  color: rgba(255, 255, 255, 0.75) !important;
+}

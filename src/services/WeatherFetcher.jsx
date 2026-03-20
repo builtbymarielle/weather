@@ -77,7 +77,7 @@ export default function WeatherFetcher({
               : "auto:ip"
             : query;
         const res = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${q}&days=1&aqi=no&alerts=no`,
+          `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${q}&days=7&aqi=no&alerts=no`,
           { signal: abortController.signal },
         );
         if (!res.ok) throw new Error("Failed to fetch weather");

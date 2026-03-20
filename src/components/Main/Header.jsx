@@ -2,7 +2,6 @@
  * Header — Main weather header for the selected location: local time, name, temp, condition, high/low, icon, and a short recommendation.
  * Receives full weather object from App; isCurrent toggles the location icon (arrow vs dot).
  */
-import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,

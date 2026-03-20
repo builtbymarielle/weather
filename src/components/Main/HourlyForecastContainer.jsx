@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+/**
+ * HourlyForecast — Displays 24h of weather data, weather Temp and weather Icon.
+ * Receives full weather object from App; displays temperature of every hour of day
+ */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Main.module.css";
@@ -11,7 +14,7 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
   const currentHour = currentDate.getHours();
 
   return (
-    <div className="container">
+    <div className="container mb-3">
       <div className={`card ${styles.glassCard} text-white d-flex`}>
         <div
           className={`card-header ${styles.cardHeaderCustom} d-flex align-items-center p-3`}
