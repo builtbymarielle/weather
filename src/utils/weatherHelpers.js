@@ -25,32 +25,92 @@ export function getWeatherIconClass(conditionText, isDay) {
 }
 
 /**
+ * List out the basic temp Category guidelines for (F or C) temps
+ * @param {number} temp - the number of the temperature
+ * @param {string} unit - is it Feriheit or Celcius
+ * @returns {string} - category the temp lands on
+ */
+function getTempCategory(temp, unit) {
+  if (unit === "F") {
+    if (temp < 14) return "very_cold";
+    if (temp <= 50) return "cold";
+    if (temp <= 64) return "cool";
+    if (temp <= 75) return "comfortable";
+    if (temp <= 82) return "warm";
+    if (temp <= 95) return "hot";
+    return "very_hot";
+  } else {
+    if (temp < -10) return "very_cold";
+    if (temp <= 10) return "cold";
+    if (temp <= 18) return "cool";
+    if (temp <= 24) return "comfortable";
+    if (temp <= 28) return "warm";
+    if (temp <= 35) return "hot";
+    return "very_hot";
+  }
+}
+
+/**
  * Generate an array of weather recommendations
- * @param {string} conditionText
+ * @param {string} condition
  * @param {number} uv - UV index
- * @param {number} highTemp - High temperature in Fahrenheit
- * @param {number} lowTemp - Low temperature in Fahrenheit
+ * @param {number} currentTemp - current temperature
+ * @param {string} tempunit - Fahrenheit or Celcius
  * @returns {string} - A list of recommendations
  */
-
-export function getRecommendations(condition, uv, highTemp, lowTemp) {
+export function getRecommendations(condition, uv, currentTemp, tempUnit) {
   if (!condition) return ["Have a great day!"];
 
   const tips = [];
   const cond = condition.toLowerCase();
 
-  if (cond.includes("rain"))
-    tips.push("Don't forget your umbrella! It's going to rain today. ");
-  if (highTemp > 80)
-    tips.push(
-      "It's going to be a hot day. Stay hydrated and wear sunglasses. ",
-    );
-  if (lowTemp < 30)
-    tips.push("It's going to be a cold day. Bundle up and stay warm! ");
-  if (uv > 7)
-    tips.push("The UV index is high. Apply sunscreen and limit time outside. ");
+  const tempCategory = getTempCategory(currentTemp, tempUnit);
 
-  if (tips.length === 0) tips.push("Have a great day! ");
+  if (cond.includes("rain")) {
+    tips.push("Don't forget your umbrella! It's going to rain today.");
+  }
+
+  if (cond.includes("snow")) {
+    tips.push("Snow is expected—drive carefully and dress warmly.");
+  }
+
+  if (cond.includes("cloud")) {
+    tips.push("Cloudy skies today—perfect for a relaxed day outside.");
+  }
+
+  if (cond.includes("clear") || cond.includes("sunny")) {
+    tips.push("Clear skies today—great time to be outdoors!");
+  }
+
+  switch (tempCategory) {
+    case "very_hot":
+      tips.push("Extreme heat. Stay indoors and hydrate often.");
+      break;
+    case "hot":
+      tips.push("It's hot. Stay cool and drink plenty of water.");
+      break;
+    case "warm":
+      tips.push("Warm weather. Perfect for light clothing.");
+      break;
+    case "cool":
+      tips.push("A bit cool. Consider a light jacket.");
+      break;
+    case "cold":
+      tips.push("Cold weather. Wear a coat and stay warm.");
+      break;
+    case "very_cold":
+      tips.push("Freezing temperatures—bundle up.");
+      break;
+  }
+
+  if (uv >= 8) {
+    tips.push("Very high UV. Apply sunscreen and avoid midday sun.");
+  } else if (uv >= 6) {
+    tips.push("High UV. Wear sunscreen and sunglasses.");
+  }
+
+  if (tips.length === 0) tips.push("Have a great day!");
+
   return tips;
 }
 

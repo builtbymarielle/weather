@@ -7,7 +7,8 @@ import { getWeatherIconClass } from "../../utils/weatherHelpers";
 
 export default function HourlyForecastContainer({ weather, tempUnit }) {
   const hours = weather.forecast.forecastday[0].hour;
-  const currentHour = new Date().getHours();
+  const currentDate = new Date(weather.location.localtime);
+  const currentHour = currentDate.getHours();
 
   return (
     <div className="container">
@@ -22,15 +23,7 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
           {hours.map((hour) => {
             const condition = hour.condition.text;
             const isDay = hour.is_day;
-            const [weatherIconClass, setWeatherIconClass] = useState("");
-
-            // Passing the weather conditions and getting back weather icons
-            useEffect(() => {
-              if (condition) {
-                const iconClass = getWeatherIconClass(condition, isDay);
-                setWeatherIconClass(iconClass);
-              }
-            }, [condition, isDay]);
+            const weatherIconClass = getWeatherIconClass(condition, isDay);
 
             const date = new Date(hour.time);
             const hourNumber = date.getHours();
@@ -52,7 +45,7 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
                 key={hour.time_epoch}
                 className={`py-1 px-2 gap-2 rounded d-flex flex-column align-items-center justify-content-between text-nowrap ${isCurrentHour ? `fw-bold ${styles.cardOutlineCustom}` : ""}`}
               >
-                <span>{formattedTime}</span>
+                <span>{isCurrentHour ? "Now" : formattedTime}</span>
                 {weatherIconClass && (
                   <i
                     className={`wi ${weatherIconClass} ${styles.weatherIcon}`}

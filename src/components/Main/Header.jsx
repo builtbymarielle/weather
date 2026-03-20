@@ -22,11 +22,6 @@ export default function Header({
   locationDisplayName,
   time12,
 }) {
-  // Getting the recommendation for the weather
-  const [recommendation, setRecommendation] = useState("");
-  // Getting the weather icon class depending on the current condition
-  const [weatherIconClass, setWeatherIconClass] = useState("");
-
   // For current location, prefer reverse-geocoded city name over API's neighborhood
   const locationName =
     locationDisplayName || weather?.location?.name || "Current Location";
@@ -53,19 +48,15 @@ export default function Header({
   const region = weather?.location.region;
   let iso = isoAbbreviation(country, region);
 
-  // Passing the weather conditions and getting back recommendations based on that.
-  useEffect(() => {
-    const tips = getRecommendations(currentCondition, uv, highTempF, lowTempF);
-    setRecommendation(tips);
-  }, [currentCondition, highTempF, lowTempF, uv]);
-
+  // // Passing the weather conditions and getting back recommendations based on that.
+  const recommendations = getRecommendations(
+    currentCondition,
+    uv,
+    currentTempValue,
+    tempUnit,
+  ).join(" ");
   // Passing the weather conditions and getting back weather icons
-  useEffect(() => {
-    if (currentCondition) {
-      const iconClass = getWeatherIconClass(currentCondition, isDay);
-      setWeatherIconClass(iconClass);
-    }
-  }, [currentCondition, isDay]);
+  const weatherIconClass = getWeatherIconClass(currentCondition, isDay);
 
   return (
     <header className={`p-3 text-white w-100`}>
@@ -83,7 +74,7 @@ export default function Header({
         High: {highTempValue}°{tempUnit} | Low: {lowTempValue}°{tempUnit} |
         Local Time: {time12}
       </p>
-      <p className={styles.recommendation}>{recommendation}</p>
+      <p className={styles.recommendation}>{recommendations}</p>
     </header>
   );
 }
