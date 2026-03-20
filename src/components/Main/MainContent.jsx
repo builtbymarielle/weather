@@ -13,7 +13,7 @@ export default function MainContent({
   time12,
 }) {
   return (
-    <div className="container-fluid p-0 d-flex flex-column w-100 overflow-hidden">
+    <div className="container-fluid px-0 py-2 d-flex flex-column w-100 overflow-scroll">
       <Header
         weather={weather}
         tempUnit={tempUnit}

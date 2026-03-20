@@ -1,7 +1,4 @@
-/**
- * HourlyForecast — Displays 24h of weather data, weather Temp and weather Icon.
- * Receives full weather object from App; displays temperature of every hour of day
- */
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Main.module.css";
@@ -10,8 +7,41 @@ import { getWeatherIconClass } from "../../utils/weatherHelpers";
 
 export default function HourlyForecastContainer({ weather, tempUnit }) {
   const hours = weather.forecast.forecastday[0].hour;
-  const currentDate = new Date(weather.location.localtime);
-  const currentHour = currentDate.getHours();
+
+  // Track current hour based on weather location
+  const [currentHour, setCurrentHour] = useState(
+    new Date(weather.location.localtime).getHours(),
+  );
+
+  useEffect(() => {
+    const updateCurrentHour = () => {
+      const now = new Date(weather.location.localtime);
+      setCurrentHour(now.getHours());
+    };
+
+    // Update immediately
+    updateCurrentHour();
+
+    // Compute ms until next hour
+    const now = new Date(weather.location.localtime);
+    const msUntilNextHour =
+      (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
+
+    // First timeout to sync exactly at next hour
+    const timeout = setTimeout(() => {
+      updateCurrentHour();
+
+      // Then update every hour
+      const interval = setInterval(updateCurrentHour, 60 * 60 * 1000);
+      // Save interval so we can clear it
+      window.__hourlyInterval = interval;
+    }, msUntilNextHour);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(window.__hourlyInterval);
+    };
+  }, [weather.location.localtime]);
 
   return (
     <div className="container mb-3">
@@ -30,23 +60,22 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
 
             const date = new Date(hour.time);
             const hourNumber = date.getHours();
-            // Setting date to Hour time (12-hour AM, PM)
             const formattedTime = date.toLocaleTimeString([], {
               hour: "numeric",
             });
 
-            // Getting the current hour and Bolding it
             const isCurrentHour = hourNumber === currentHour;
 
-            // Getting the hourly temperature. Changes to tempUnit (F or C)
             const hourTempF = hour.temp_f;
             const hourTempC = hour.temp_c;
-            let hourTemp = setTempUnit(tempUnit, hourTempF, hourTempC);
+            const hourTemp = setTempUnit(tempUnit, hourTempF, hourTempC);
 
             return (
               <div
                 key={hour.time_epoch}
-                className={`py-1 px-2 gap-2 rounded d-flex flex-column align-items-center justify-content-between text-nowrap ${isCurrentHour ? `fw-bold ${styles.cardOutlineCustom}` : ""}`}
+                className={`py-1 px-2 gap-2 rounded d-flex flex-column align-items-center justify-content-between text-nowrap ${
+                  isCurrentHour ? `fw-bold ${styles.cardOutlineCustom}` : ""
+                }`}
               >
                 <span>{isCurrentHour ? "Now" : formattedTime}</span>
                 {weatherIconClass && (

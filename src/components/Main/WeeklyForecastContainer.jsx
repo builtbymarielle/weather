@@ -10,7 +10,6 @@ import { getWeatherIconClass } from "../../utils/weatherHelpers";
 
 export default function WeeklyForecastContainer({ weather, tempUnit }) {
   const days = weather.forecast.forecastday;
-  console.log(days);
 
   return (
     <div className="container mb-3">
@@ -23,7 +22,6 @@ export default function WeeklyForecastContainer({ weather, tempUnit }) {
         </div>
         <div className="card-body d-flex flex-column overflow-x-auto overflow-y-hidden gap-2">
           {days.map((day) => {
-            console.log(day);
             const dayName = new Date(day.date + "T12:00:00").toLocaleDateString(
               "en-US",
               {
