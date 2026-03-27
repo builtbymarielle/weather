@@ -20,8 +20,7 @@ export function getWeatherIconClass(conditionText, isDay) {
   if (text.includes("snow")) return isDay ? "wi-day-snow" : "wi-night-snow";
   if (text.includes("fog") || text.includes("mist"))
     return isDay ? "wi-day-fog" : "wi-night-fog";
-
-  return "wi-na";
+  if (text.includes("light drizzle")) return "wi-sprinkle";
 }
 
 /**
