@@ -58,7 +58,7 @@ export default function Header({
   const weatherIconClass = getWeatherIconClass(currentCondition, isDay);
 
   return (
-    <header className={`p-3 text-white w-100`}>
+    <header className={`p-3 text-white container`}>
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />

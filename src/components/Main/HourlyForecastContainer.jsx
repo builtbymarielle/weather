@@ -10,11 +10,14 @@ import { setTempUnit } from "../../utils/uiHelpers";
 import { getWeatherIconClass } from "../../utils/weatherHelpers";
 
 export default function HourlyForecastContainer({ weather, tempUnit }) {
-  const hours = weather.forecast.forecastday[0].hour;
-  // Track current hour based on weather location
-  const [currentHour, setCurrentHour] = useState(
-    new Date(weather.location.localtime).getHours(),
-  );
+  // Getting today's and tomorrow's hourly forecast
+  const todaysHours = weather.forecast.forecastday[0].hour;
+  const tomorrowsHours = weather.forecast.forecastday[1].hour;
+  const allHours = [...todaysHours, ...tomorrowsHours];
+
+  // Getting the next 24 hours starting from the current hour
+  const currentHourIndex = new Date(weather.location.localtime).getHours();
+  const next24Hours = allHours.slice(currentHourIndex, currentHourIndex + 24);
 
   return (
     <div className="container mb-3">
@@ -26,7 +29,7 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
           <h6 className="ms-2 mb-0">Today's Hourly Forecast</h6>
         </div>
         <div className="card-body d-flex overflow-x-auto overflow-y-hidden gap-2">
-          {hours.map((hour) => {
+          {next24Hours.map((hour) => {
             const condition = hour.condition.text;
             const isDay = hour.is_day;
             const weatherIconClass = getWeatherIconClass(condition, isDay);
@@ -39,7 +42,7 @@ export default function HourlyForecastContainer({ weather, tempUnit }) {
             });
 
             // Getting the current hour and Bolding it
-            const isCurrentHour = hourNumber === currentHour;
+            const isCurrentHour = hourNumber === currentHourIndex;
 
             // Getting the hourly temperature. Changes to tempUnit (F or C)
             const hourTempF = hour.temp_f;

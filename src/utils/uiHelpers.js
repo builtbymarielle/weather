@@ -50,7 +50,7 @@ export function parseTimeWith12Hour(timeStr) {
  * @returns {{ hour24: number, time12: string }}
  */
 export function getLiveTimeInZone(tzId) {
-  if (!tzId) return { hour24: 12, time12: "12:00PM" };
+  if (!tzId) return { hour24: 12, time12: "12:00 PM" };
   try {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-US", {
@@ -66,10 +66,10 @@ export function getLiveTimeInZone(tzId) {
     const period = hour24 >= 12 ? "PM" : "AM";
     let hour12 = hour24 % 12;
     if (hour12 === 0) hour12 = 12;
-    const time12 = `${hour12}:${minute.toString().padStart(2, "0")}${period}`;
+    const time12 = `${hour12}:${minute.toString().padStart(2, "0")} ${period}`;
     return { hour24, time12 };
   } catch {
-    return { hour24: 12, time12: "12:00PM" };
+    return { hour24: 12, time12: "12:00 PM" };
   }
 }
 
