@@ -4,15 +4,17 @@ import en from "i18n-iso-countries/langs/en.json";
 /**
  * Determine background theme class based on hour
  * @param {number} hour 0-23
+ * @param {boolean} is_day from WeatherAPI (1 for day, 0 for night)
  * @param {object} styles CSS Module object
  * @returns {string} background class
  */
-export function getBgTheme(hour, styles) {
-  if (hour >= 0 && hour < 6) return styles.bgNight;
-  if (hour >= 6 && hour < 12) return styles.bgSunrise;
-  if (hour >= 12 && hour < 17) return styles.bgDay;
-  if (hour >= 17 && hour < 21) return styles.bgSunset;
-  return styles.bgNight; // 21-24
+export function getBgTheme(hour, isDay, styles) {
+  if (isDay === 0) return styles.bgNight;
+  if (hour < 10) return styles.bgSunrise;
+  if (hour < 17) return styles.bgDay;
+  if (hour < 21) return styles.bgSunset;
+
+  return styles.bgNight;
 }
 
 /**

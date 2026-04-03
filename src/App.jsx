@@ -234,7 +234,8 @@ function App() {
   const tzId = weather?.location?.tz_id;
   const fallback = parseTimeWith12Hour(weather?.location?.localtime);
   const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
-  const bgTheme = getBgTheme(hour24, styles);
+  const isDay = weather?.current?.is_day;
+  const bgTheme = getBgTheme(hour24, isDay, styles);
 
   return (
     <div className={`${bgTheme} d-flex vh-100`}>

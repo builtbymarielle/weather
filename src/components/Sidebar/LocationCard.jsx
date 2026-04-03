@@ -29,8 +29,9 @@ export default function LocationCard({
   // If the timezone ID is not found, we use the fallback time
   const fallback = parseTimeWith12Hour(fullData?.location?.localtime);
   const { hour24, time12 } = tzId ? getLiveTimeInZone(tzId) : fallback;
+  const isDay = fullData?.current.is_day;
   // Getting the background theme for the location. This is based on the hour of day
-  const bgTheme = getBgTheme(hour24, styles);
+  const bgTheme = getBgTheme(hour24, isDay, styles);
 
   // if the location is current use arrow icon, otherwise use location dot icon
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
