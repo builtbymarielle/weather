@@ -4,15 +4,17 @@ import en from "i18n-iso-countries/langs/en.json";
 /**
  * Determine background theme class based on hour
  * @param {number} hour 0-23
+ * @param {boolean} is_day from WeatherAPI (1 for day, 0 for night)
  * @param {object} styles CSS Module object
  * @returns {string} background class
  */
-export function getBgTheme(hour, styles) {
-  if (hour >= 0 && hour < 6) return styles.bgNight;
-  if (hour >= 6 && hour < 12) return styles.bgSunrise;
-  if (hour >= 12 && hour < 17) return styles.bgDay;
-  if (hour >= 17 && hour < 21) return styles.bgSunset;
-  return styles.bgNight; // 21-24
+export function getBgTheme(hour, isDay, styles) {
+  if (isDay === 0) return styles.bgNight;
+  if (hour < 10) return styles.bgSunrise;
+  if (hour < 17) return styles.bgDay;
+  if (hour < 21) return styles.bgSunset;
+
+  return styles.bgNight;
 }
 
 /**
@@ -50,7 +52,7 @@ export function parseTimeWith12Hour(timeStr) {
  * @returns {{ hour24: number, time12: string }}
  */
 export function getLiveTimeInZone(tzId) {
-  if (!tzId) return { hour24: 12, time12: "12:00PM" };
+  if (!tzId) return { hour24: 12, time12: "12:00 PM" };
   try {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-US", {
@@ -66,10 +68,10 @@ export function getLiveTimeInZone(tzId) {
     const period = hour24 >= 12 ? "PM" : "AM";
     let hour12 = hour24 % 12;
     if (hour12 === 0) hour12 = 12;
-    const time12 = `${hour12}:${minute.toString().padStart(2, "0")}${period}`;
+    const time12 = `${hour12}:${minute.toString().padStart(2, "0")} ${period}`;
     return { hour24, time12 };
   } catch {
-    return { hour24: 12, time12: "12:00PM" };
+    return { hour24: 12, time12: "12:00 PM" };
   }
 }
 
@@ -140,4 +142,64 @@ export function isoAbbreviation(country, region) {
     return `${US_STATES[region]}, ${countryCode}`;
   }
   return countryCode;
+}
+
+/**
+ * Setting up the temp unit, used in header, locationCards, and chartCharts
+ * @param {tempUnit} F or C
+ * @param {tempF} F
+ * @param {tempC} C
+ * @returns {tempValue} temp in F or C
+ */
+export function setTempUnit(tempUnit, tempF, tempC) {
+  let tempValue = "";
+  if (tempUnit === "F" && tempF != null) {
+    tempValue = tempF;
+  } else if (tempUnit === "C" && tempC != null) {
+    tempValue = tempC;
+  }
+  return tempValue;
+}
+
+/**
+ * Setting up the time. Split number time and amPM. // 07:24 AM
+ * @param {time} // 07:24 AM
+ * @returns {timeOnly, amPm} // 7:24, AM
+ */
+export function setClockTime(time) {
+  let timeOnly = "";
+  let amPm = "";
+  if (time) {
+    const [timePart, modifier] = time.split(" ");
+    timeOnly = timePart.replace(/^0/, "");
+    amPm = modifier;
+  }
+  return [timeOnly, amPm];
+}
+
+/**
+ * Setting up the measurement unit, used in chartCharts
+ * @param {measurementUnit} standard or metric
+ * @param {standardValue} standard value
+ * @param {metricValue} metric value
+ * @param {standardLabel} standard label (miles, mph, in)
+ * @param {metricLabel} metric label (kms, kph, mm)
+ * @returns {value, label}
+ */
+export function setMeasurementValue(
+  measurementUnit,
+  standardValue,
+  metricValue,
+  standardLabel,
+  metricLabel,
+) {
+  if (measurementUnit === "standard" && standardValue != null) {
+    return [standardValue, standardLabel];
+  }
+
+  if (measurementUnit === "metric" && metricValue != null) {
+    return [metricValue, metricLabel];
+  }
+
+  return [0, ""];
 }

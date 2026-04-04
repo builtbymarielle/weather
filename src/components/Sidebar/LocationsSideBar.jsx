@@ -4,6 +4,8 @@
  */
 import SearchBar from "./SearchBar";
 import LocationCard from "./LocationCard";
+import SettingsMenu from "./SettingsMenu";
+import ToggleSidebar from "./ToggleSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -11,7 +13,7 @@ import {
   faClockRotateLeft,
   faLocationCrosshairs,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./LocationsSideBar.module.css";
+import styles from "./Sidebar.module.css";
 
 function LocationsSideBar({
   currentLocation,
@@ -24,6 +26,12 @@ function LocationsSideBar({
   locationButtonDisabled,
   gettingLocation,
   isCurrentLocationLoading,
+  tempUnit,
+  onChangeTempUnit,
+  measurementUnit,
+  onChangeMeasurementUnit,
+  isSidebarOpen,
+  onToggleSidebar,
 }) {
   // Button label depending on if the user is getting the location, fetching weather, or in 60s cooldown
   const locationButtonLabel = gettingLocation
@@ -42,13 +50,32 @@ function LocationsSideBar({
     gettingLocation || isCurrentLocationLoading;
 
   return (
-    <aside className={`sidebar ${styles.bgColor} p-3`}>
+    <aside
+      className={`${styles.sidebar} ${isSidebarOpen ? "p-3" : ""} ${
+        !isSidebarOpen ? styles.sidebarClosed : ""
+      }`}
+    >
       <div className="sidebar-header pb-2">
-        <div className={`${styles.customBrand} sidebar-brand pb-2 mb-2`}>
-          <FontAwesomeIcon icon={faLocationDot} className="me-1" />
-          <span>Locations</span>
+        <div
+          className={`${styles.customBrand} sidebar-brand pb-2 mb-2 justify-content-between align-items-center d-flex`}
+        >
+          <div>
+            <FontAwesomeIcon icon={faLocationDot} className="me-1" />
+            <span>Locations</span>
+          </div>
+          {isSidebarOpen && (
+            <ToggleSidebar onToggle={onToggleSidebar} isOpen={isSidebarOpen} />
+          )}
         </div>
-        <SearchBar onSearch={(query) => onSearch(query)} />
+        <div className="d-flex justify-content-between align-items-center gap-2">
+          <SearchBar onSearch={(query) => onSearch(query)} />
+          <SettingsMenu
+            tempUnit={tempUnit}
+            measurementUnit={measurementUnit}
+            onChangeTempUnit={onChangeTempUnit}
+            onChangeMeasurementUnit={onChangeMeasurementUnit}
+          />
+        </div>
       </div>
 
       <ul className="sidebar-nav list-unstyled pb-2">
@@ -68,6 +95,7 @@ function LocationsSideBar({
                 {...currentLocation}
                 selected={selectedLocation === currentLocation}
                 isCurrent={true}
+                tempUnit={tempUnit}
               />
             </button>
           </li>
@@ -106,6 +134,7 @@ function LocationsSideBar({
                     selected={selectedLocation?.city === loc.city}
                     fullData={loc.fullData}
                     clockTick={clockTick}
+                    tempUnit={tempUnit}
                   />
                 </button>
               </li>

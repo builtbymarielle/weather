@@ -3,7 +3,7 @@
  */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import styles from "./SearchBar.module.css";
+import styles from "./Sidebar.module.css";
 
 export default function SearchBar({ onSearch }) {
   // When the user submits the form, we get the location from the form data and call the onSearch function
@@ -18,19 +18,20 @@ export default function SearchBar({ onSearch }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded shadow-md">
-      <div className={`d-flex ${styles.bgInputDark} rounded`}>
+    <form onSubmit={handleSubmit} className={styles.searchForm}>
+      <div className={styles.searchField}>
         <button
-          className="px-2 py-1 bg-transparent text-light rounded-start border-0"
           type="submit"
+          className={styles.searchIconBtn}
+          aria-label="Search for a city"
         >
-          <FontAwesomeIcon icon={faMagnifyingGlass} className="text-gray-300" />
+          <FontAwesomeIcon icon={faMagnifyingGlass} />
         </button>
         <input
           name="location"
+          type="search"
           placeholder="Search for a city..."
-          id={`${styles.searchInput}`}
-          className="w-100 bg-transparent outline-none"
+          className={styles.searchInput}
           autoComplete="off"
         />
       </div>
