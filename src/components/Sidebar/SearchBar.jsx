@@ -18,7 +18,7 @@ export default function SearchBar({ onSearch }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded shadow-md">
+    <form onSubmit={handleSubmit} className="rounded shadow-md w-100">
       <div className={`d-flex ${styles.bgInputDark} rounded`}>
         <button
           className="px-2 py-1 bg-transparent text-light rounded-start border-0"

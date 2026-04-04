@@ -11,6 +11,8 @@
   --text-white: #ffffff;
   --text-white-trans: #ffffff80;
   --text-placeholder: rgba(255, 255, 255, 0.55);
+
+  --blue: #4facfe;
 }
 
 body {
