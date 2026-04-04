@@ -1,51 +1,68 @@
-import React, { useState, useEffect, use } from "react";
+/**
+ * Header — Main weather header for the selected location: local time, name, temp, condition, high/low, icon, and a short recommendation.
+ * Receives full weather object from App; isCurrent toggles the location icon (arrow vs dot).
+ */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
   faLocationArrow,
 } from "@fortawesome/free-solid-svg-icons";
-import styles from "./Header.module.css";
+import styles from "./Main.module.css";
 import {
   getWeatherIconClass,
   getRecommendations,
 } from "../../utils/weatherHelpers";
-import { getBgTheme, parseTimeWith12Hour } from "../../utils/uiHelpers";
+import { isoAbbreviation, setTempUnit } from "../../utils/uiHelpers";
 
-export default function Header({ weather, isCurrent }) {
-  const [recommendation, setRecommendation] = useState("");
-  const [weatherIconClass, setWeatherIconClass] = useState("");
-
-  const locationName = weather.location.name;
+export default function Header({
+  weather,
+  tempUnit,
+  isCurrent,
+  locationDisplayName,
+  time12,
+}) {
+  // For current location, prefer reverse-geocoded city name over API's neighborhood
+  const locationName =
+    locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
-  const currentTemp = weather.current.temp_f;
-  const highTemp = weather.forecast.forecastday[0].day.maxtemp_f;
-  const lowTemp = weather.forecast.forecastday[0].day.mintemp_f;
-  const localTime = weather.location.localtime;
+  const currentTempF = weather.current.temp_f;
+  const currentTempC = weather.current.temp_c;
+  let currentTempValue = setTempUnit(tempUnit, currentTempF, currentTempC);
+
+  const highTempF = weather.forecast.forecastday[0].day.maxtemp_f;
+  const highTempC = weather.forecast.forecastday[0].day.maxtemp_c;
+  let highTempValue = setTempUnit(tempUnit, highTempF, highTempC);
+
+  const lowTempF = weather.forecast.forecastday[0].day.mintemp_f;
+  const lowTempC = weather.forecast.forecastday[0].day.mintemp_c;
+  let lowTempValue = setTempUnit(tempUnit, lowTempF, lowTempC);
+
   const uv = weather.current.uv;
   const isDay = weather.current.is_day;
-
-  const { hour24, time12 } = parseTimeWith12Hour(localTime);
-  const bgTheme = getBgTheme(hour24, styles);
+  // if the location is current use arrow icon, otherwise use location dot icon
   const locationIcon = isCurrent ? faLocationArrow : faLocationDot;
 
-  useEffect(() => {
-    const tips = getRecommendations(currentCondition, uv, highTemp, lowTemp);
-    setRecommendation(tips);
-  }, [currentCondition, highTemp, lowTemp, uv]);
+  // Setting Region name as State or Country
+  const country = weather?.location.country;
+  const region = weather?.location.region;
+  let iso = isoAbbreviation(country, region);
 
-  useEffect(() => {
-    if (currentCondition) {
-      const iconClass = getWeatherIconClass(currentCondition, isDay);
-      setWeatherIconClass(iconClass);
-    }
-  }, [currentCondition, isDay]);
+  // // Passing the weather conditions and getting back recommendations based on that.
+  const recommendations = getRecommendations(
+    currentCondition,
+    uv,
+    currentTempValue,
+    tempUnit,
+  ).join(" ");
+  // Passing the weather conditions and getting back weather icons
+  const weatherIconClass = getWeatherIconClass(currentCondition, isDay);
 
   return (
-    <header className={`${bgTheme} p-3 text-white w-100`}>
+    <header className={`p-3 text-white container`}>
       <small>{time12}</small>
       <h2>
         <FontAwesomeIcon icon={locationIcon} className="me-2" />
-        {locationName} — {currentTemp}°F
+        {locationName}, {iso} — {currentTempValue}°{tempUnit}
       </h2>
       <p>{currentCondition?.text}</p>
       {weatherIconClass && (
@@ -53,9 +70,10 @@ export default function Header({ weather, isCurrent }) {
       )}
 
       <p>
-        High: {highTemp}°F | Low: {lowTemp}°F | Local Time: {localTime}
+        High: {highTempValue}°{tempUnit} | Low: {lowTempValue}°{tempUnit} |
+        Local Time: {time12}
       </p>
-      <p className={styles.recommendation}>{recommendation}</p>
+      <p className={styles.recommendation}>{recommendations}</p>
     </header>
   );
 }

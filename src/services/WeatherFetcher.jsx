@@ -1,10 +1,54 @@
+/**
+ * WeatherFetcher — Fetches weather for the current `query` (city name or "Current Location").
+ *
+ * - If we have fresh cached data (same query, cachedAt within 1 hour), we call onData(cachedData) and skip the API.
+ * - For "Current Location", when currentLocationRefreshTrigger > 0 we skip cache so "Update current location" always refetches.
+ * - Re-runs when query, hourRefreshTrigger, or currentLocationRefreshTrigger change.
+ */
 import { useEffect } from "react";
 
-// This component handles fetching weather data
-export default function WeatherFetcher({ query, onData, onLoading, onError }) {
+const CACHE_FRESH_MS = 60 * 60 * 1000; // 1 hour — use cache, no API call
+
+export default function WeatherFetcher({
+  query,
+  currentLocationLat,
+  currentLocationLon,
+  hourRefreshTrigger,
+  currentLocationRefreshTrigger,
+  cachedData,
+  cachedAt,
+  onData,
+  onLoading,
+  onError,
+}) {
   const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
+  // When user clicks on "Use my location" button, fetch the users current location
+  // If the user has a current location in localStorage we update the text to "Update current location"....it does the same thing on button click
   useEffect(() => {
+    // User clicked "Use my location" / "Update current location"
+    const skipCacheForCurrentLocation =
+      query === "Current Location" &&
+      currentLocationRefreshTrigger != null &&
+      currentLocationRefreshTrigger > 0;
+    const useCacheForCurrentLocation =
+      query === "Current Location" &&
+      cachedData &&
+      !skipCacheForCurrentLocation;
+    const useCacheForOthers =
+      query !== "Current Location" &&
+      cachedData &&
+      cachedAt != null &&
+      Date.now() - cachedAt < CACHE_FRESH_MS;
+
+    const useCache = useCacheForCurrentLocation || useCacheForOthers;
+
+    // Here we are checking if the data is fresh,
+    if (useCache) {
+      onData(cachedData);
+      return;
+    }
+
     const abortController = new AbortController();
     const fetchWeather = async () => {
       try {
@@ -18,9 +62,22 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
           return;
         }
 
-        const q = query === "Current Location" ? "auto:ip" : query;
+        // "Current Location" with lat/lon → use coordinates so API returns city name; otherwise fall back to auto:ip
+        // const q = query === "Current Location" ? "auto:ip" : query;
+        const hasCoords =
+          query === "Current Location" &&
+          currentLocationLat != null &&
+          currentLocationLon != null &&
+          currentLocationLat != "" &&
+          currentLocationLon != "";
+        const q =
+          query === "Current Location"
+            ? hasCoords
+              ? `${currentLocationLat},${currentLocationLon}`
+              : "auto:ip"
+            : query;
         const res = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${q}&days=1&aqi=no&alerts=no`,
+          `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${q}&days=7&aqi=no&alerts=no`,
           { signal: abortController.signal },
         );
         if (!res.ok) throw new Error("Failed to fetch weather");
@@ -37,7 +94,13 @@ export default function WeatherFetcher({ query, onData, onLoading, onError }) {
 
     fetchWeather();
     return () => abortController.abort();
-  }, [query]);
+  }, [
+    query,
+    currentLocationLat,
+    currentLocationLon,
+    hourRefreshTrigger,
+    currentLocationRefreshTrigger,
+  ]);
 
   return null;
 }
