@@ -5,6 +5,7 @@
 import SearchBar from "./SearchBar";
 import LocationCard from "./LocationCard";
 import SettingsMenu from "./SettingsMenu";
+import ToggleSidebar from "./ToggleSidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -29,6 +30,8 @@ function LocationsSideBar({
   onChangeTempUnit,
   measurementUnit,
   onChangeMeasurementUnit,
+  isSidebarOpen,
+  onToggleSidebar,
 }) {
   // Button label depending on if the user is getting the location, fetching weather, or in 60s cooldown
   const locationButtonLabel = gettingLocation
@@ -47,7 +50,11 @@ function LocationsSideBar({
     gettingLocation || isCurrentLocationLoading;
 
   return (
-    <aside className={`sidebar ${styles.bgColor} p-3`}>
+    <aside
+      className={`${styles.sidebar} ${isSidebarOpen ? "p-3" : ""} ${
+        !isSidebarOpen ? styles.sidebarClosed : ""
+      }`}
+    >
       <div className="sidebar-header pb-2">
         <div
           className={`${styles.customBrand} sidebar-brand pb-2 mb-2 justify-content-between align-items-center d-flex`}
@@ -56,6 +63,9 @@ function LocationsSideBar({
             <FontAwesomeIcon icon={faLocationDot} className="me-1" />
             <span>Locations</span>
           </div>
+          {isSidebarOpen && (
+            <ToggleSidebar onToggle={onToggleSidebar} isOpen={isSidebarOpen} />
+          )}
         </div>
         <div className="d-flex justify-content-between align-items-center gap-2">
           <SearchBar onSearch={(query) => onSearch(query)} />

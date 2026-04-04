@@ -237,6 +237,13 @@ function App() {
   const isDay = weather?.current?.is_day;
   const bgTheme = getBgTheme(hour24, isDay, styles);
 
+  // Controler for toggling the sidebar open and closed
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div className={`${bgTheme} d-flex vh-100`}>
       <LocationsSideBar
@@ -254,6 +261,8 @@ function App() {
         onChangeTempUnit={handleChangeTempUnit}
         measurementUnit={measurementUnit}
         onChangeMeasurementUnit={handleChangeMeasurementUnit}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={toggleSidebar}
       />
 
       <main className="w-100 d-flex overflow-hidden">
@@ -382,6 +391,8 @@ function App() {
                 : undefined
             }
             time12={time12}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={toggleSidebar}
           />
         )}
       </main>
