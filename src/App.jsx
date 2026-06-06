@@ -237,8 +237,18 @@ function App() {
   const isDay = weather?.current?.is_day;
   const bgTheme = getBgTheme(hour24, isDay, styles);
 
-  // Controler for toggling the sidebar open and closed
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // Controller for toggling the sidebar open and closed
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const stored = localStorage.getItem("sidebarOpen");
+
+    if (stored === null) return true; // default open
+
+    return JSON.parse(stored);
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebarOpen", JSON.stringify(isSidebarOpen));
+  }, [isSidebarOpen]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);

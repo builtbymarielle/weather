@@ -362,3 +362,13 @@
 .toggleBtnMain:hover {
   background: rgba(255, 255, 255, 0.32);
 }
+
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+  .sidebarClosed {
+    width: 0;
+  }
+}
