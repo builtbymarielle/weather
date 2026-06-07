@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Dropdown from "bootstrap/js/dist/dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear, faCheck } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Sidebar.module.css";
@@ -13,32 +14,19 @@ export default function SettingsMenu({
   const [spin, setSpin] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Make the settings icon spin when the dropdown is opened or closed
-  useEffect(() => {
-    const el = dropdownRef.current;
-
-    const handleShow = () => {
-      setIsOpen(true);
-      setSpin(true);
-    };
-
-    const handleHide = () => {
-      setIsOpen(false);
-      setSpin(true);
-    };
-
-    if (el) {
-      el.addEventListener("show.bs.dropdown", handleShow);
-      el.addEventListener("hide.bs.dropdown", handleHide);
-    }
-
-    return () => {
-      if (el) {
-        el.removeEventListener("show.bs.dropdown", handleShow);
-        el.removeEventListener("hide.bs.dropdown", handleHide);
-      }
-    };
-  }, []);
+  // Toggle dropdown
+  const handleToggle = (e) => {
+    e.preventDefault();
+    if (!dropdownRef.current) return;
+    const toggle = dropdownRef.current.querySelector(
+      '[data-bs-toggle="dropdown"]',
+    );
+    if (!toggle) return;
+    const inst = Dropdown.getInstance(toggle) || new Dropdown(toggle);
+    inst.toggle();
+    setIsOpen((prev) => !prev);
+    setSpin(true);
+  };
 
   // Remove spin class after animation ends
   useEffect(() => {
@@ -47,6 +35,27 @@ export default function SettingsMenu({
       return () => clearTimeout(timer);
     }
   }, [spin]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleDocClick = (e) => {
+      if (!dropdownRef.current) return;
+      if (isOpen && !dropdownRef.current.contains(e.target)) {
+        const toggle = dropdownRef.current.querySelector(
+          '[data-bs-toggle="dropdown"]',
+        );
+        if (toggle) {
+          const inst = Dropdown.getInstance(toggle) || new Dropdown(toggle);
+          inst.hide();
+        }
+        setIsOpen(false);
+        setSpin(true);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDocClick);
+    return () => document.removeEventListener("mousedown", handleDocClick);
+  }, [isOpen]);
 
   return (
     <div ref={dropdownRef} className="dropdown" data-bs-auto-close="outside">
@@ -57,6 +66,7 @@ export default function SettingsMenu({
         type="button"
         data-bs-toggle="dropdown"
         aria-expanded={isOpen}
+        onClick={handleToggle}
       >
         <FontAwesomeIcon icon={faGear} className={spin ? styles.spin : ""} />
       </button>
