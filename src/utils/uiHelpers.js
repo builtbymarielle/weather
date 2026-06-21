@@ -137,11 +137,15 @@ countries.registerLocale(en);
  * @returns {{ ISO - International Organization for Standardization: Universal Recognized Three Letter Codes }}
  */
 export function isoAbbreviation(country, region) {
-  let countryCode = countries.getAlpha3Code(country, "en");
+  if (!country) return "";
+
+  const countryCode = countries.getAlpha3Code(country, "en");
+
   if (countryCode === "USA" && region) {
-    return `${US_STATES[region]}, ${countryCode}`;
+    return `${US_STATES[region] || region}, ${countryCode}`;
   }
-  return countryCode;
+
+  return countryCode || country;
 }
 
 /**

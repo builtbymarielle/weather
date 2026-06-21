@@ -18,6 +18,7 @@ import styles from "./Sidebar.module.css";
 function LocationsSideBar({
   currentLocation,
   recentLocations,
+  onDeleteLocation,
   selectedLocation,
   onSelectLocation,
   onSearch,
@@ -135,6 +136,7 @@ function LocationsSideBar({
                     fullData={loc.fullData}
                     clockTick={clockTick}
                     tempUnit={tempUnit}
+                    onDelete={() => onDeleteLocation(loc)}
                   />
                 </button>
               </li>

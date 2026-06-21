@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
   faLocationArrow,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Sidebar.module.css";
 import {
@@ -23,6 +24,7 @@ export default function LocationCard({
   isCurrent,
   fullData,
   tempUnit,
+  onDelete,
 }) {
   // Getting the timezone ID and local time for the location
   const tzId = fullData?.location?.tz_id;
@@ -77,6 +79,17 @@ export default function LocationCard({
       {!selected && <div className={styles.overlay}></div>} {/* overlay */}
       <div className="d-flex justify-content-between gap-2">
         {time12 && <small>{time12}</small>}
+        {/* If not the current location card */}
+        {!isCurrent && (
+          <FontAwesomeIcon
+            icon={faTrash}
+            className={styles.deleteIcon}
+            onClick={(e) => {
+              e.stopPropagation(); // prevents selecting the card
+              onDelete(city);
+            }}
+          />
+        )}
       </div>
       <div className="d-flex flex-column align-items-baseline">
         <div className="d-flex align-items-baseline">

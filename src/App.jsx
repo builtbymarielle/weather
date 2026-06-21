@@ -11,6 +11,7 @@
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import { reverseGeocodeToCity } from "./utils/weatherHelpers";
+import { isoAbbreviation } from "./utils/uiHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import "./styles/App.css";
 import {
@@ -254,11 +255,21 @@ function App() {
     setIsSidebarOpen((prev) => !prev);
   };
 
+  const [locationToDelete, setLocationToDelete] = useState(null);
+
+  // Deletes a location from the recent locations list and updates localStorage
+  function handleDeleteLocation(city) {
+    const updatedLocations = recentLocations.filter((loc) => loc.city !== city);
+    setRecentLocations(updatedLocations);
+    localStorage.setItem("recentLocations", JSON.stringify(updatedLocations));
+  }
+
   return (
     <div className={`${bgTheme} d-flex vh-100`}>
       <LocationsSideBar
         currentLocation={currentLocation}
         recentLocations={recentLocations}
+        onDeleteLocation={(loc) => setLocationToDelete(loc)}
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectLocation}
         onSearch={setQuery}
@@ -404,6 +415,61 @@ function App() {
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={toggleSidebar}
           />
+        )}
+
+        {locationToDelete && (
+          <>
+            <div className="modal fade show d-flex" tabIndex="-1">
+              <div className="modal-dialog modal-dialog-centered modal-slide-up">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Delete Location</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setLocationToDelete(null)}
+                    />
+                  </div>
+
+                  <div className="modal-body">
+                    <p>
+                      Are you sure you want to remove{" "}
+                      <strong>
+                        {locationToDelete.city},{" "}
+                        {isoAbbreviation(
+                          locationToDelete?.fullData?.location?.country,
+                          locationToDelete?.fullData?.location?.region,
+                        )}
+                      </strong>{" "}
+                      from your saved locations?
+                    </p>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-transparent"
+                      onClick={() => setLocationToDelete(null)}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => {
+                        handleDeleteLocation(locationToDelete.city);
+                        setLocationToDelete(null);
+                      }}
+                    >
+                      Remove Location
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* backdrop */}
+            <div className="modal-backdrop fade show"></div>
+          </>
         )}
       </main>
     </div>
