@@ -21,6 +21,7 @@ import {
 } from "./utils/uiHelpers";
 import styles from "../src/components/Main/Main.module.css";
 import MainContent from "./components/Main/MainContent";
+import { arrayMove } from "@dnd-kit/sortable";
 
 // the max of recent location searches is 5
 const MAX_RECENTS = 5;
@@ -264,6 +265,14 @@ function App() {
     localStorage.setItem("recentLocations", JSON.stringify(updatedLocations));
   }
 
+  const onReorderRecentLocations = (oldIndex, newIndex) => {
+    setRecentLocations((prev) => {
+      const reordered = arrayMove(prev, oldIndex, newIndex);
+      localStorage.setItem("recentLocations", JSON.stringify(reordered));
+      return reordered;
+    });
+  };
+
   return (
     <div className={`${bgTheme} d-flex vh-100`}>
       <LocationsSideBar
@@ -284,6 +293,7 @@ function App() {
         onChangeMeasurementUnit={handleChangeMeasurementUnit}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={toggleSidebar}
+        onReorderRecentLocations={onReorderRecentLocations}
       />
 
       <main className="w-100 d-flex overflow-hidden">

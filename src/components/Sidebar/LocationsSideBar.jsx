@@ -1,11 +1,23 @@
 /**
  * LocationsSideBar — Left sidebar with search, "Use my location" button, current location card, and recent location cards.
  * All location data and handlers come from App.jsx
+ * The recent locations are wrapped in DndContext and SortableContext from dnd-kit to allow drag-and-drop reordering.
+ * Each recent location is rendered as a SortableLocationItem, which is a wrapper around LocationCard that adds
+ * the drag-and-drop functionality.
  */
 import SearchBar from "./SearchBar";
 import LocationCard from "./LocationCard";
 import SettingsMenu from "./SettingsMenu";
 import ToggleSidebar from "./ToggleSidebar";
+import SortableLocationItem from "./SortableLocationItem";
+
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLocationDot,
@@ -33,6 +45,7 @@ function LocationsSideBar({
   onChangeMeasurementUnit,
   isSidebarOpen,
   onToggleSidebar,
+  onReorderRecentLocations,
 }) {
   // Button label depending on if the user is getting the location, fetching weather, or in 60s cooldown
   const locationButtonLabel = gettingLocation
@@ -113,37 +126,51 @@ function LocationsSideBar({
           </button>
         </li>
 
-        {/* Recents: last few searched cities (from App state / localStorage) */}
         <li className={`${styles.customTitle} sidebar-title pb-2`}>
           <FontAwesomeIcon icon={faClockRotateLeft} className="me-1" />
           <span>Recents</span>
         </li>
 
-        {recentLocations && recentLocations.length > 0 ? (
-          recentLocations
-            .filter(
-              (loc) => loc?.city?.toLowerCase()?.trim() !== "current location",
-            )
-            .map((loc, idx) => (
-              <li key={loc.city + idx} className="nav-item mb-2">
-                <button
-                  className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
-                  onClick={() => onSelectLocation(loc)}
-                >
-                  <LocationCard
-                    {...loc}
-                    selected={selectedLocation?.city === loc.city}
-                    fullData={loc.fullData}
-                    clockTick={clockTick}
-                    tempUnit={tempUnit}
-                    onDelete={() => onDeleteLocation(loc)}
-                  />
-                </button>
-              </li>
-            ))
-        ) : (
-          <p className="text-white">No locations saved.</p>
-        )}
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={(event) => {
+            const { active, over } = event;
+
+            if (!over || active.id === over.id) return;
+
+            const oldIndex = recentLocations.findIndex(
+              (item) => item.city === active.id,
+            );
+
+            const newIndex = recentLocations.findIndex(
+              (item) => item.city === over.id,
+            );
+
+            onReorderRecentLocations(oldIndex, newIndex);
+          }}
+        >
+          <SortableContext
+            items={recentLocations.map((l) => l.city)}
+            strategy={verticalListSortingStrategy}
+          >
+            {recentLocations
+              .filter(
+                (loc) =>
+                  loc?.city?.toLowerCase()?.trim() !== "current location",
+              )
+              .map((loc) => (
+                <SortableLocationItem
+                  key={loc.city}
+                  loc={loc}
+                  selected={selectedLocation?.city === loc.city}
+                  onSelectLocation={onSelectLocation}
+                  onDeleteLocation={onDeleteLocation}
+                  tempUnit={tempUnit}
+                  clockTick={clockTick}
+                />
+              ))}
+          </SortableContext>
+        </DndContext>
       </ul>
     </aside>
   );
