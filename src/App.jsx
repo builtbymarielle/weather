@@ -30,12 +30,22 @@ function isCurrentLocationLabel(city) {
   return normalized === "current location";
 }
 
-/** Creating a random ID for a recent location */
+/** Creating a stable id / API query from weather data coordinates. */
 function createLocationId(data) {
   const lat = data?.location?.lat;
   const lon = data?.location?.lon;
   if (lat != null && lon != null) return `${lat},${lon}`;
   return crypto.randomUUID();
+}
+
+/** Unambiguous fetch key for a saved location (coordinates, not city name). */
+function getLocationFetchQuery(loc) {
+  if (!loc) return "";
+  if (isCurrentLocationLabel(loc.city)) return "Current Location";
+  const lat = loc.fullData?.location?.lat;
+  const lon = loc.fullData?.location?.lon;
+  if (lat != null && lon != null) return `${lat},${lon}`;
+  return loc.id ?? loc.city;
 }
 
 /** Whether two saved locations refer to the same card. */
@@ -235,7 +245,7 @@ function App() {
    */
   const handleSelectLocation = (loc) => {
     if (!loc) return;
-    setQuery(loc.city);
+    setQuery(getLocationFetchQuery(loc));
     setSelectedLocation(loc);
     const isCurrent = isCurrentLocationLabel(loc?.city);
     if (isCurrent && loc?.fullData?.location != null) {
@@ -250,12 +260,8 @@ function App() {
     }
   };
 
-  // Does the selected location match the query?
   const selectedMatchesQuery =
-    selectedLocation &&
-    (selectedLocation.city === query ||
-      (query === "Current Location" &&
-        isCurrentLocationLabel(selectedLocation.city)));
+    selectedLocation && getLocationFetchQuery(selectedLocation) === query;
 
   // Get the local time zone, get time, and set background theme
   const tzId = weather?.location?.tz_id;
@@ -291,7 +297,7 @@ function App() {
     if (selectedLocation?.id === id) {
       setSelectedLocation(currentLocation);
       setWeather(currentLocation?.fullData);
-      setQuery(currentLocation?.city);
+      setQuery(getLocationFetchQuery(currentLocation));
     }
   }
 
@@ -413,11 +419,7 @@ function App() {
               } else {
                 // Merge this city into recents (update if exists, else add); Use ref so we don't lose updates when multiple onData run close together.
                 const prev = recentLocationsRef.current;
-                const existing = prev.find(
-                  (loc) =>
-                    loc.id === locationData.id ||
-                    loc.city?.toLowerCase() === locationData.city.toLowerCase(),
-                );
+                const existing = prev.find((loc) => loc.id === locationData.id);
                 if (existing) {
                   locationData.id = existing.id;
                 }
@@ -431,6 +433,9 @@ function App() {
                 setRecentLocations(updatedList);
 
                 setSelectedLocation(locationData);
+                if (queryRef.current === fetchedForQuery) {
+                  setQuery(getLocationFetchQuery(locationData));
+                }
               }
 
               setWeather(data);
