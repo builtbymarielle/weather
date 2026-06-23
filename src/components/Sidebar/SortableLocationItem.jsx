@@ -7,6 +7,7 @@
  * LocationCard, and we stop the click event from propagating when the delete icon
  * is clicked to prevent selecting the card when trying to delete.
  */
+import { useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import LocationCard from "./LocationCard";
@@ -19,6 +20,7 @@ function SortableLocationItem({
   tempUnit,
   clockTick,
 }) {
+  const wasDraggedRef = useRef(false);
   const {
     attributes,
     listeners,
@@ -27,8 +29,15 @@ function SortableLocationItem({
     transition,
     isDragging,
   } = useSortable({
-    id: loc.city,
+    id: loc.id,
   });
+
+  // If the item was dragged, we set a ref to ignore the next click event (which would select the card after dragging)
+  useEffect(() => {
+    if (isDragging) {
+      wasDraggedRef.current = true;
+    }
+  }, [isDragging]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -36,11 +45,20 @@ function SortableLocationItem({
     opacity: isDragging ? 0.6 : 1,
   };
 
+  const handleSelect = () => {
+    if (wasDraggedRef.current) {
+      wasDraggedRef.current = false;
+      return;
+    }
+    onSelectLocation(loc);
+  };
+
   return (
     <li ref={setNodeRef} style={style} className="nav-item mb-2">
       <button
+        type="button"
         className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
-        onClick={() => onSelectLocation(loc)}
+        onClick={handleSelect}
         {...attributes}
         {...listeners}
         style={{ cursor: "grab" }}
@@ -50,7 +68,7 @@ function SortableLocationItem({
           selected={selected}
           tempUnit={tempUnit}
           clockTick={clockTick}
-          onDelete={(city) => onDeleteLocation(loc)}
+          onDelete={() => onDeleteLocation(loc)}
         />
       </button>
     </li>

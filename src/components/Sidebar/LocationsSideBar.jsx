@@ -11,10 +11,9 @@ import SettingsMenu from "./SettingsMenu";
 import ToggleSidebar from "./ToggleSidebar";
 import SortableLocationItem from "./SortableLocationItem";
 
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import {
   SortableContext,
-  arrayMove,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
@@ -63,6 +62,12 @@ function LocationsSideBar({
   const isCurrentLocationCardDisabled =
     gettingLocation || isCurrentLocationLoading;
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  );
+
   return (
     <aside
       className={`${styles.sidebar} ${isSidebarOpen ? "p-3" : ""} ${
@@ -107,7 +112,10 @@ function LocationsSideBar({
             >
               <LocationCard
                 {...currentLocation}
-                selected={selectedLocation === currentLocation}
+                selected={
+                  !!currentLocation &&
+                  selectedLocation?.id === currentLocation?.id
+                }
                 isCurrent={true}
                 tempUnit={tempUnit}
               />
@@ -132,6 +140,7 @@ function LocationsSideBar({
         </li>
 
         <DndContext
+          sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={(event) => {
             const { active, over } = event;
@@ -139,18 +148,18 @@ function LocationsSideBar({
             if (!over || active.id === over.id) return;
 
             const oldIndex = recentLocations.findIndex(
-              (item) => item.city === active.id,
+              (item) => item.id === active.id,
             );
 
             const newIndex = recentLocations.findIndex(
-              (item) => item.city === over.id,
+              (item) => item.id === over.id,
             );
 
             onReorderRecentLocations(oldIndex, newIndex);
           }}
         >
           <SortableContext
-            items={recentLocations.map((l) => l.city)}
+            items={recentLocations.map((l) => l.id)}
             strategy={verticalListSortingStrategy}
           >
             {recentLocations
@@ -160,9 +169,9 @@ function LocationsSideBar({
               )
               .map((loc) => (
                 <SortableLocationItem
-                  key={loc.city}
+                  key={loc.id}
                   loc={loc}
-                  selected={selectedLocation?.city === loc.city}
+                  selected={selectedLocation?.id === loc.id}
                   onSelectLocation={onSelectLocation}
                   onDeleteLocation={onDeleteLocation}
                   tempUnit={tempUnit}
