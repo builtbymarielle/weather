@@ -25,6 +25,7 @@ export default function Header({
   const locationName =
     locationDisplayName || weather?.location?.name || "Current Location";
   const currentCondition = weather.current.condition.text;
+
   const currentTempF = weather.current.temp_f;
   const currentTempC = weather.current.temp_c;
   let currentTempValue = setTempUnit(tempUnit, currentTempF, currentTempC);

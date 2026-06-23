@@ -45,6 +45,10 @@ export default function LocationCard({
   const region = fullData?.location.region;
   let iso = isoAbbreviation(country, region);
 
+  const currentTempF = fullData.current?.temp_f;
+  const currentTempC = fullData.current?.temp_c;
+  let currentTempValue = setTempUnit(tempUnit, currentTempF, currentTempC);
+
   const lowTempF = fullData.forecast?.forecastday?.[0]?.day?.mintemp_f;
   const lowTempC = fullData.forecast?.forecastday?.[0]?.day?.mintemp_c;
   let lowTempValue = setTempUnit(tempUnit, lowTempF, lowTempC);
@@ -106,7 +110,9 @@ export default function LocationCard({
           </small>
         )}
       </div>
-      <h1>{fullData.current.temp_f}°F</h1>
+      <h1>
+        {currentTempValue ?? "-"}°{tempUnit}
+      </h1>
       <div className="d-flex align-items-baseline justify-content-between">
         <p className="text-lg m-0">{fullData.current.condition?.text ?? "—"}</p>
         <p className="text-lg m-0 fw-bold">
