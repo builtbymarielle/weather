@@ -11,7 +11,13 @@ import SettingsMenu from "./SettingsMenu";
 import ToggleSidebar from "./ToggleSidebar";
 import SortableLocationItem from "./SortableLocationItem";
 
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,

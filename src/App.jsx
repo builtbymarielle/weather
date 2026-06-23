@@ -23,8 +23,8 @@ import styles from "../src/components/Main/Main.module.css";
 import MainContent from "./components/Main/MainContent";
 import { arrayMove } from "@dnd-kit/sortable";
 
-// the max of recent location searches is 5
-const MAX_RECENTS = 5;
+// the max of recent location searches is 50
+const MAX_RECENTS = 50;
 
 /** Returns true if the city label is "Current Location" (so we don't save it in recents). */
 function isCurrentLocationLabel(city) {

@@ -45,6 +45,7 @@ function SortableLocationItem({
     opacity: isDragging ? 0.6 : 1,
   };
 
+  // When the delete button is clicked, we stop the click event from propagating to prevent selecting the card when trying to delete
   const handleSelect = () => {
     if (wasDraggedRef.current) {
       wasDraggedRef.current = false;
