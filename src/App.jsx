@@ -290,10 +290,11 @@ function App() {
   function handleDeleteLocation(id) {
     const updatedLocations = recentLocations.filter((loc) => loc.id !== id);
     setRecentLocations(updatedLocations);
+    // If the selected location is the one being deleted, set the selected location to current location
     if (selectedLocation?.id === id) {
-      setSelectedLocation(null);
-      setWeather(null);
-      setQuery("");
+      setSelectedLocation(currentLocation);
+      setWeather(currentLocation?.fullData);
+      setQuery(currentLocation?.city);
     }
   }
 
