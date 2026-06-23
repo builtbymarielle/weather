@@ -23,9 +23,6 @@ import styles from "../src/components/Main/Main.module.css";
 import MainContent from "./components/Main/MainContent";
 import { arrayMove } from "@dnd-kit/sortable";
 
-// the max of recent location searches is 50
-const MAX_RECENTS = 50;
-
 /** Returns true if the city label is "Current Location" (so we don't save it in recents). */
 function isCurrentLocationLabel(city) {
   if (!city || typeof city !== "string") return false;
@@ -414,7 +411,7 @@ function App() {
                   );
                 }
               } else {
-                // Merge this city into recents (update if exists, else add); cap at MAX_RECENTS. Use ref so we don't lose updates when multiple onData run close together.
+                // Merge this city into recents (update if exists, else add); Use ref so we don't lose updates when multiple onData run close together.
                 const prev = recentLocationsRef.current;
                 const existing = prev.find(
                   (loc) =>
@@ -430,9 +427,8 @@ function App() {
                 if (!existing) {
                   updatedList.unshift(locationData);
                 }
-                const next = updatedList.slice(0, MAX_RECENTS);
-                recentLocationsRef.current = next;
-                setRecentLocations(next);
+                recentLocationsRef.current = updatedList;
+                setRecentLocations(updatedList);
 
                 setSelectedLocation(locationData);
               }
