@@ -21,15 +21,38 @@ import {
 } from "./utils/uiHelpers";
 import styles from "../src/components/Main/Main.module.css";
 import MainContent from "./components/Main/MainContent";
-
-// the max of recent location searches is 5
-const MAX_RECENTS = 5;
+import { arrayMove } from "@dnd-kit/sortable";
 
 /** Returns true if the city label is "Current Location" (so we don't save it in recents). */
 function isCurrentLocationLabel(city) {
   if (!city || typeof city !== "string") return false;
   const normalized = city.toLowerCase().trim();
   return normalized === "current location";
+}
+
+/** Creating a stable id / API query from weather data coordinates. */
+function createLocationId(data) {
+  const lat = data?.location?.lat;
+  const lon = data?.location?.lon;
+  if (lat != null && lon != null) return `${lat},${lon}`;
+  return crypto.randomUUID();
+}
+
+/** Unambiguous fetch key for a saved location (coordinates, not city name). */
+function getLocationFetchQuery(loc) {
+  if (!loc) return "";
+  if (isCurrentLocationLabel(loc.city)) return "Current Location";
+  const lat = loc.fullData?.location?.lat;
+  const lon = loc.fullData?.location?.lon;
+  if (lat != null && lon != null) return `${lat},${lon}`;
+  return loc.id ?? loc.city;
+}
+
+/** Whether two saved locations refer to the same card. */
+function isSameLocation(a, b) {
+  if (!a || !b) return false;
+  if (a.id && b.id) return a.id === b.id;
+  return a === b;
 }
 
 function App() {
@@ -90,6 +113,12 @@ function App() {
   const lastFetchedAtRef = useRef(null);
   const recentLocationsRef = useRef(recentLocations);
   const locationButtonCooldownTimeoutRef = useRef(null);
+  const queryRef = useRef(query);
+
+  // Keep ref in sync so onData always merges against latest query (avoids losing items when multiple updates run)
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
 
   // On load, show saved current location from localStorage without calling the API
   useEffect(() => {
@@ -216,7 +245,8 @@ function App() {
    */
   const handleSelectLocation = (loc) => {
     if (!loc) return;
-    setQuery(loc.city);
+    setQuery(getLocationFetchQuery(loc));
+    setSelectedLocation(loc);
     const isCurrent = isCurrentLocationLabel(loc?.city);
     if (isCurrent && loc?.fullData?.location != null) {
       setLat(loc.fullData.location.lat ?? "");
@@ -226,10 +256,12 @@ function App() {
       setLon("");
     }
     if (loc.fullData) {
-      setSelectedLocation(loc);
       setWeather(loc.fullData);
     }
   };
+
+  const selectedMatchesQuery =
+    selectedLocation && getLocationFetchQuery(selectedLocation) === query;
 
   // Get the local time zone, get time, and set background theme
   const tzId = weather?.location?.tz_id;
@@ -258,11 +290,24 @@ function App() {
   const [locationToDelete, setLocationToDelete] = useState(null);
 
   // Deletes a location from the recent locations list and updates localStorage
-  function handleDeleteLocation(city) {
-    const updatedLocations = recentLocations.filter((loc) => loc.city !== city);
+  function handleDeleteLocation(id) {
+    const updatedLocations = recentLocations.filter((loc) => loc.id !== id);
     setRecentLocations(updatedLocations);
-    localStorage.setItem("recentLocations", JSON.stringify(updatedLocations));
+    // If the selected location is the one being deleted, set the selected location to current location
+    if (selectedLocation?.id === id) {
+      setSelectedLocation(currentLocation);
+      setWeather(currentLocation?.fullData);
+      setQuery(getLocationFetchQuery(currentLocation));
+    }
   }
+
+  const onReorderRecentLocations = (oldIndex, newIndex) => {
+    setRecentLocations((prev) => {
+      const reordered = arrayMove(prev, oldIndex, newIndex);
+      localStorage.setItem("recentLocations", JSON.stringify(reordered));
+      return reordered;
+    });
+  };
 
   return (
     <div className={`${bgTheme} d-flex vh-100`}>
@@ -284,6 +329,7 @@ function App() {
         onChangeMeasurementUnit={handleChangeMeasurementUnit}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={toggleSidebar}
+        onReorderRecentLocations={onReorderRecentLocations}
       />
 
       <main className="w-100 d-flex overflow-hidden">
@@ -309,10 +355,8 @@ function App() {
             cachedData={
               query === "Current Location"
                 ? (currentLocation?.fullData ??
-                  (selectedLocation?.city === query
-                    ? selectedLocation?.fullData
-                    : null))
-                : selectedLocation?.city === query
+                  (selectedMatchesQuery ? selectedLocation?.fullData : null))
+                : selectedMatchesQuery
                   ? selectedLocation?.fullData
                   : null
             }
@@ -321,13 +365,14 @@ function App() {
                 ? (currentLocation?.lastUpdated ??
                   selectedLocation?.lastUpdated ??
                   null)
-                : selectedLocation?.city === query
+                : selectedMatchesQuery
                   ? (selectedLocation?.lastUpdated ?? null)
                   : null
             }
             onData={async (data) => {
               lastFetchedAtRef.current = Date.now();
-              const isCurrentLocation = query === "Current Location";
+              const fetchedForQuery = query;
+              const isCurrentLocation = fetchedForQuery === "Current Location";
               // For current location, resolve lat/lon to city name (not neighborhood) via reverse geocoding
               let actualCityName = isCurrentLocation
                 ? data.location.name
@@ -342,7 +387,13 @@ function App() {
                 const cityName = await reverseGeocodeToCity(coordLat, coordLon);
                 if (cityName) actualCityName = cityName;
               }
+
+              if (queryRef.current !== fetchedForQuery) return;
+
               const locationData = {
+                id: isCurrentLocation
+                  ? "current-location"
+                  : createLocationId(data),
                 city: isCurrentLocation
                   ? "Current Location"
                   : data.location.name,
@@ -366,27 +417,25 @@ function App() {
                   );
                 }
               } else {
-                // Merge this city into recents (update if exists, else add); cap at MAX_RECENTS. Use ref so we don't lose updates when multiple onData run close together.
+                // Merge this city into recents (update if exists, else add); Use ref so we don't lose updates when multiple onData run close together.
                 const prev = recentLocationsRef.current;
+                const existing = prev.find((loc) => loc.id === locationData.id);
+                if (existing) {
+                  locationData.id = existing.id;
+                }
                 const updatedList = prev.map((loc) =>
-                  loc.city?.toLowerCase() === locationData.city.toLowerCase()
-                    ? locationData
-                    : loc,
+                  loc.id === locationData.id ? locationData : loc,
                 );
-                if (
-                  !updatedList.some(
-                    (loc) =>
-                      loc.city?.toLowerCase() ===
-                      locationData.city.toLowerCase(),
-                  )
-                ) {
+                if (!existing) {
                   updatedList.unshift(locationData);
                 }
-                const next = updatedList.slice(0, MAX_RECENTS);
-                recentLocationsRef.current = next;
-                setRecentLocations(next);
+                recentLocationsRef.current = updatedList;
+                setRecentLocations(updatedList);
 
                 setSelectedLocation(locationData);
+                if (queryRef.current === fetchedForQuery) {
+                  setQuery(getLocationFetchQuery(locationData));
+                }
               }
 
               setWeather(data);
@@ -404,10 +453,10 @@ function App() {
             weather={weather}
             tempUnit={tempUnit}
             measurementUnit={measurementUnit}
-            isCurrent={selectedLocation === currentLocation}
+            isCurrent={isSameLocation(selectedLocation, currentLocation)}
             clockTick={clockTick}
             locationDisplayName={
-              selectedLocation === currentLocation
+              isSameLocation(selectedLocation, currentLocation)
                 ? selectedLocation?.actualCityName
                 : undefined
             }
@@ -456,7 +505,7 @@ function App() {
                     <button
                       className="btn btn-danger"
                       onClick={() => {
-                        handleDeleteLocation(locationToDelete.city);
+                        handleDeleteLocation(locationToDelete.id);
                         setLocationToDelete(null);
                       }}
                     >

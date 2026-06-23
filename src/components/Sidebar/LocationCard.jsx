@@ -80,13 +80,14 @@ export default function LocationCard({
       <div className="d-flex justify-content-between gap-2">
         {time12 && <small>{time12}</small>}
         {/* If not the current location card */}
-        {!isCurrent && (
+        {!isCurrent && onDelete && (
           <FontAwesomeIcon
             icon={faTrash}
             className={styles.deleteIcon}
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              e.stopPropagation(); // prevents selecting the card
-              onDelete(city);
+              e.stopPropagation();
+              onDelete();
             }}
           />
         )}
