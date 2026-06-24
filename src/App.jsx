@@ -13,6 +13,7 @@ import WeatherFetcher from "./services/WeatherFetcher";
 import { reverseGeocodeToCity } from "./utils/weatherHelpers";
 import { isoAbbreviation } from "./utils/uiHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
+import DeleteLocationModal from "./components/Modals/DeleteLocationModal";
 import "./styles/App.css";
 import {
   getBgTheme,
@@ -467,58 +468,14 @@ function App() {
         )}
 
         {locationToDelete && (
-          <>
-            <div className="modal fade show d-flex" tabIndex="-1">
-              <div className="modal-dialog modal-dialog-centered modal-slide-up">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Delete Location</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setLocationToDelete(null)}
-                    />
-                  </div>
-
-                  <div className="modal-body">
-                    <p>
-                      Are you sure you want to remove{" "}
-                      <strong>
-                        {locationToDelete.city},{" "}
-                        {isoAbbreviation(
-                          locationToDelete?.fullData?.location?.country,
-                          locationToDelete?.fullData?.location?.region,
-                        )}
-                      </strong>{" "}
-                      from your saved locations?
-                    </p>
-                  </div>
-
-                  <div className="modal-footer">
-                    <button
-                      className="btn btn-transparent"
-                      onClick={() => setLocationToDelete(null)}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => {
-                        handleDeleteLocation(locationToDelete.id);
-                        setLocationToDelete(null);
-                      }}
-                    >
-                      Remove Location
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* backdrop */}
-            <div className="modal-backdrop fade show"></div>
-          </>
+          <DeleteLocationModal
+            locationToDelete={locationToDelete}
+            onCancel={() => setLocationToDelete(null)}
+            onConfirm={(id) => {
+              handleDeleteLocation(id);
+              setLocationToDelete(null);
+            }}
+          />
         )}
       </main>
     </div>
