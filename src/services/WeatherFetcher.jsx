@@ -104,3 +104,27 @@ export default function WeatherFetcher({
 
   return null;
 }
+
+
+/**
+ * Fetches matching cities from WeatherAPI based on the user's search query.
+ *
+ * @param {string} query - Partial or full city name entered by the user.
+ * @returns {Promise<Array>} A list of matching city suggestions.
+ * @throws {Error} If the API request fails.
+ */
+export async function searchCities(query) {
+  const response = await fetch(
+    `https://api.weatherapi.com/v1/search.json?key=${
+      import.meta.env.VITE_WEATHER_API_KEY
+    }&q=${encodeURIComponent(query)}`
+  );
+
+  // Throw an error so the calling component can handle it.
+  if (!response.ok) {
+    throw new Error("Failed to fetch city suggestions");
+  }
+
+  // Parse and return the list of matching locations.
+  return response.json();
+}

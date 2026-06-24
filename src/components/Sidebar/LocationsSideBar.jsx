@@ -76,7 +76,7 @@ function LocationsSideBar({
 
   return (
     <aside
-      className={`${styles.sidebar} ${isSidebarOpen ? "p-3" : ""} ${
+      className={`${styles.sidebar} ${isSidebarOpen ? "p-3 pb-0" : ""} ${
         !isSidebarOpen ? styles.sidebarClosed : ""
       }`}
     >
@@ -103,90 +103,92 @@ function LocationsSideBar({
         </div>
       </div>
 
-      <ul className="sidebar-nav list-unstyled pb-2">
-        {/* Favorites: saved current location card (from localStorage or after "Use my location") */}
-        <li className={`${styles.customTitle} sidebar-title pb-2`}>
-          <FontAwesomeIcon icon={faStar} className="me-1" />
-          <span>Favorites</span>
-        </li>
-        {currentLocation && (
-          <li key={currentLocation} className="nav-item mb-2">
+      <div className={`${styles.locationsList} px-1`}>
+        <ul className="sidebar-nav list-unstyled pb-2">
+          {/* Favorites: saved current location card (from localStorage or after "Use my location") */}
+          <li className={`${styles.customTitle} sidebar-title pb-2`}>
+            <FontAwesomeIcon icon={faStar} className="me-1" />
+            <span>Favorites</span>
+          </li>
+          {currentLocation && (
+            <li key={currentLocation} className="nav-item mb-2">
+              <button
+                className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
+                onClick={() => onSelectLocation(currentLocation)}
+                disabled={isCurrentLocationCardDisabled}
+              >
+                <LocationCard
+                  {...currentLocation}
+                  selected={
+                    !!currentLocation &&
+                    selectedLocation?.id === currentLocation?.id
+                  }
+                  isCurrent={true}
+                  tempUnit={tempUnit}
+                />
+              </button>
+            </li>
+          )}
+          <li className="nav-item mb-2">
             <button
-              className="p-0 m-0 w-100 text-left border-0 rounded bg-transparent"
-              onClick={() => onSelectLocation(currentLocation)}
-              disabled={isCurrentLocationCardDisabled}
+              type="button"
+              className={`${styles.customLocationButton} p-0 w-100 border-0 rounded bg-transparent text-white d-flex align-items-center gap-1`}
+              onClick={onGetCurrentLocation}
+              disabled={isDisabled}
             >
-              <LocationCard
-                {...currentLocation}
-                selected={
-                  !!currentLocation &&
-                  selectedLocation?.id === currentLocation?.id
-                }
-                isCurrent={true}
-                tempUnit={tempUnit}
-              />
+              <FontAwesomeIcon icon={faLocationCrosshairs} className="me-1" />
+              <span>{locationButtonLabel}</span>
             </button>
           </li>
-        )}
-        <li className="nav-item mb-2">
-          <button
-            type="button"
-            className={`${styles.customLocationButton} p-0 w-100 border-0 rounded bg-transparent text-white d-flex align-items-center gap-1`}
-            onClick={onGetCurrentLocation}
-            disabled={isDisabled}
+
+          <li className={`${styles.customTitle} sidebar-title pb-2`}>
+            <FontAwesomeIcon icon={faClockRotateLeft} className="me-1" />
+            <span>Recents</span>
+          </li>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => {
+              const { active, over } = event;
+
+              if (!over || active.id === over.id) return;
+
+              const oldIndex = recentLocations.findIndex(
+                (item) => item.id === active.id,
+              );
+
+              const newIndex = recentLocations.findIndex(
+                (item) => item.id === over.id,
+              );
+
+              onReorderRecentLocations(oldIndex, newIndex);
+            }}
           >
-            <FontAwesomeIcon icon={faLocationCrosshairs} className="me-1" />
-            <span>{locationButtonLabel}</span>
-          </button>
-        </li>
-
-        <li className={`${styles.customTitle} sidebar-title pb-2`}>
-          <FontAwesomeIcon icon={faClockRotateLeft} className="me-1" />
-          <span>Recents</span>
-        </li>
-
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={(event) => {
-            const { active, over } = event;
-
-            if (!over || active.id === over.id) return;
-
-            const oldIndex = recentLocations.findIndex(
-              (item) => item.id === active.id,
-            );
-
-            const newIndex = recentLocations.findIndex(
-              (item) => item.id === over.id,
-            );
-
-            onReorderRecentLocations(oldIndex, newIndex);
-          }}
-        >
-          <SortableContext
-            items={recentLocations.map((l) => l.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {recentLocations
-              .filter(
-                (loc) =>
-                  loc?.city?.toLowerCase()?.trim() !== "current location",
-              )
-              .map((loc) => (
-                <SortableLocationItem
-                  key={loc.id}
-                  loc={loc}
-                  selected={selectedLocation?.id === loc.id}
-                  onSelectLocation={onSelectLocation}
-                  onDeleteLocation={onDeleteLocation}
-                  tempUnit={tempUnit}
-                  clockTick={clockTick}
-                />
-              ))}
-          </SortableContext>
-        </DndContext>
-      </ul>
+            <SortableContext
+              items={recentLocations.map((l) => l.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {recentLocations
+                .filter(
+                  (loc) =>
+                    loc?.city?.toLowerCase()?.trim() !== "current location",
+                )
+                .map((loc) => (
+                  <SortableLocationItem
+                    key={loc.id}
+                    loc={loc}
+                    selected={selectedLocation?.id === loc.id}
+                    onSelectLocation={onSelectLocation}
+                    onDeleteLocation={onDeleteLocation}
+                    tempUnit={tempUnit}
+                    clockTick={clockTick}
+                  />
+                ))}
+            </SortableContext>
+          </DndContext>
+        </ul>
+      </div>
     </aside>
   );
 }
