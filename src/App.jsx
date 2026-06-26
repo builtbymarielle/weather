@@ -11,7 +11,6 @@
 import { useState, useEffect, useRef } from "react";
 import WeatherFetcher from "./services/WeatherFetcher";
 import { reverseGeocodeToCity } from "./utils/weatherHelpers";
-import { isoAbbreviation } from "./utils/uiHelpers";
 import LocationsSideBar from "./components/Sidebar/LocationsSideBar";
 import DeleteLocationModal from "./components/Modals/DeleteLocationModal";
 import "./styles/App.css";
@@ -22,6 +21,8 @@ import {
 } from "./utils/uiHelpers";
 import styles from "../src/components/Main/Main.module.css";
 import MainContent from "./components/Main/MainContent";
+import AlertMessage from "./components/Common/AlertMessage";
+import LoadingIndicator from "./components/Common/LoadingIndicator";
 import { arrayMove } from "@dnd-kit/sortable";
 
 /** Returns true if the city label is "Current Location" (so we don't save it in recents). */
@@ -100,8 +101,12 @@ function App() {
   const [currentLocationRefreshTrigger, setCurrentLocationRefreshTrigger] =
     useState(0);
   const [weather, setWeather] = useState(null);
+
   const [loading, setLoading] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null)
 
   // "Use my location" button: 60s cooldown to prevent spam
   const [locationButtonDisabled, setLocationButtonDisabled] = useState(false);
@@ -239,6 +244,22 @@ function App() {
     }
   }, [recentLocations]);
 
+
+  // Only show the Loader if it is taking longer than 300ms. Prevents flashes on screen
+  useEffect(() => {
+    let timer;
+  
+    if (loading) {
+      timer = setTimeout(() => {
+        setShowLoader(true);
+      }, 300);
+    } else {
+      setShowLoader(false);
+    }
+  
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   /**
    * When user clicks a location in the sidebar: set query (so WeatherFetcher runs).
    * If we already have fullData for that location, also set selected + weather so UI shows cache immediately;
@@ -300,6 +321,17 @@ function App() {
       setWeather(currentLocation?.fullData);
       setQuery(getLocationFetchQuery(currentLocation));
     }
+
+    const city = locationToDelete?.city;
+    const state = locationToDelete?.fullData?.location?.region;
+    const country = locationToDelete?.fullData?.location?.country;
+    const locationFullName = [city, state, country].filter(Boolean).join(", ");
+
+    setSuccessMessage(
+      locationFullName
+        ? `${locationFullName} was removed successfully.`
+        : "Location was removed successfully."
+    );
   }
 
   const onReorderRecentLocations = (oldIndex, newIndex) => {
@@ -333,7 +365,7 @@ function App() {
         onReorderRecentLocations={onReorderRecentLocations}
       />
 
-      <main className="w-100 d-flex overflow-hidden">
+      <main className="w-100 d-flex flex-column overflow-hidden">
         {query && (
           <WeatherFetcher
             query={query}
@@ -446,8 +478,23 @@ function App() {
           />
         )}
 
-        {loading && <p className="text-center">Loading...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
+        {loading && (
+          <LoadingIndicator message="Fetching weather..." />
+        )}
+        {error && (
+          <AlertMessage
+            message={error}
+            variant="danger"
+            onClose={() => setError(null)}
+          />
+        )}
+        {successMessage && (
+          <AlertMessage
+            message={successMessage}
+            variant="success"
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
 
         {weather && (
           <MainContent

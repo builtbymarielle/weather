@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Sidebar.module.css";
 
-export default function SearchBar({ onSearch }) {
+export default function SearchBar({ onSearch, onError }) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
@@ -51,6 +51,9 @@ export default function SearchBar({ onSearch }) {
     } catch (error) {
       console.error(error);
       setSuggestions([]);
+      onError?.(
+        error.message || "Unable to load city suggestions."
+      );
     }
   }
 

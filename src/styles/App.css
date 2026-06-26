@@ -9,6 +9,20 @@
   animation: slideUpFade 0.3s ease-out;
 }
 
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+}
+
 @keyframes slideUpFade {
   from {
     opacity: 0;

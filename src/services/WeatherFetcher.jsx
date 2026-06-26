@@ -80,8 +80,12 @@ export default function WeatherFetcher({
           `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${q}&days=7&aqi=no&alerts=no`,
           { signal: abortController.signal },
         );
-        if (!res.ok) throw new Error("Failed to fetch weather");
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(
+            data?.error?.message || "Unable to load weather data.",
+          );
+        }
         onData(data);
       } catch (err) {
         if (err.name !== "AbortError") {
@@ -105,7 +109,6 @@ export default function WeatherFetcher({
   return null;
 }
 
-
 /**
  * Fetches matching cities from WeatherAPI based on the user's search query.
  *
@@ -117,7 +120,7 @@ export async function searchCities(query) {
   const response = await fetch(
     `https://api.weatherapi.com/v1/search.json?key=${
       import.meta.env.VITE_WEATHER_API_KEY
-    }&q=${encodeURIComponent(query)}`
+    }&q=${encodeURIComponent(query)}`,
   );
 
   // Throw an error so the calling component can handle it.
